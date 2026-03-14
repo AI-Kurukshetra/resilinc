@@ -11,23 +11,24 @@
 - [x] (2026-03-14 11:14) Cleanup structure: merged `docs/` into `doc/blueprint/` and removed redundant `agents/`.
 - [x] (2026-03-14 11:20) Add implementation control loop (`IMPLEMENTATION_STATE`, `SKILL_ROUTER`, `PROMPT_APPENDIX`, `scripts/preflight.sh`).
 - [x] (2026-03-14 11:42) Add comprehensive blueprint-driven E2E execution plan, subtask prompts, and upgraded `suffix_prompt.md`.
+- [x] (2026-03-14 14:02) Configure `pnpm` and execute previously skipped M1 quality gates (`lint`, `typecheck`, `test`) with fixes.
 
 ## E2E Blueprint Execution Plan (Track by ID)
 Reference: `doc/blueprint/E2E_DEVELOPMENT_PLAN.md`
 
 ### M1 Platform & Auth Foundation
-- [ ] M1.S1 Supabase SSR client implementation
-- [ ] M1.S1.a Browser client utility
-- [ ] M1.S1.b Server client utility
-- [ ] M1.S1.c Middleware session refresh wiring
-- [ ] M1.S2 Auth flows (login/signup/logout/reset)
-- [ ] M1.S2.a Auth pages with Zod forms
-- [ ] M1.S2.b Auth handlers/server actions
-- [ ] M1.S2.c Redirect logic
-- [ ] M1.S3 Protected dashboard session guard
-- [ ] M1.S3.a Dashboard layout guard
-- [ ] M1.S3.b Profile bootstrap
-- [ ] M1.S3.c Unauthorized/error states
+- [x] (2026-03-14 13:31) M1.S1 Supabase SSR client implementation
+- [x] (2026-03-14 13:31) M1.S1.a Browser client utility
+- [x] (2026-03-14 13:31) M1.S1.b Server client utility
+- [x] (2026-03-14 13:31) M1.S1.c Middleware session refresh wiring
+- [x] (2026-03-14 13:41) M1.S2 Auth flows (login/signup/logout/reset)
+- [x] (2026-03-14 13:41) M1.S2.a Auth pages with Zod forms
+- [x] (2026-03-14 13:41) M1.S2.b Auth handlers/server actions
+- [x] (2026-03-14 13:41) M1.S2.c Redirect logic
+- [x] (2026-03-14 13:48) M1.S3 Protected dashboard session guard
+- [x] (2026-03-14 13:48) M1.S3.a Dashboard layout guard
+- [x] (2026-03-14 13:48) M1.S3.b Profile bootstrap
+- [x] (2026-03-14 13:48) M1.S3.c Unauthorized/error states
 
 ### M2 Core Data and Supply Chain Mapping
 - [ ] M2.S1 Migration hardening and seed strategy

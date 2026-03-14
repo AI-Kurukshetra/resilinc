@@ -2,7 +2,7 @@
   "name": "resilinc-lite",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10",
+  "packageManager": "pnpm@10.32.1",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -24,6 +24,7 @@
     "zod": "^4.1.5"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@playwright/test": "^1.54.1",
     "@types/node": "^22.18.3",
     "@types/react": "^19.1.12",

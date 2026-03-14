@@ -15,3 +15,18 @@
 - Added `doc/blueprint/E2E_DEVELOPMENT_PLAN.md` with strict delivery order, module decomposition, acceptance criteria, and copy-paste prompts per subtask.
 - Reworked `doc/TASKS.md` into ID-based execution tracking (`Mx.Sy` / `Mx.Sy.z`) for agent-friendly progress management.
 - Updated `suffix_prompt.md` to enforce single-subtask execution loop and mandatory completion reporting format.
+- Implemented Supabase SSR auth utilities in `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/middleware.ts`, and wired root `middleware.ts` to refresh sessions on requests.
+- Added org-safe server helper `getAuthenticatedOrgSession()` to couple authenticated user retrieval with organization membership resolution.
+- Added Zod-based auth validation contracts in `lib/validations/auth.ts` and structured API response helpers in `lib/api/responses.ts`.
+- Added auth endpoints: `POST /api/auth/login`, `POST /api/auth/signup`, `POST /api/auth/logout`, `POST /api/auth/reset` with explicit, testable JSON error codes/messages.
+- Added auth UI flows: login, signup, reset-password, and logout pages/components under `app/(auth)` with client form handlers.
+- Extended root middleware redirect logic to enforce authenticated/unauthenticated route behavior while preserving refreshed Supabase session cookies.
+- Added protected dashboard guard logic in `app/(dashboard)/layout.tsx` with authenticated user verification, org membership check, and profile bootstrap (`profiles` upsert on first authenticated visit).
+- Added explicit dashboard unauthorized/error state components under `app/(dashboard)/_components/` for missing membership and session/bootstrap failures.
+- Moved `/logout` route to `app/(auth)/logout/page.tsx` so authenticated users without org membership can still sign out.
+- Installed and configured `pnpm` for the workspace; generated `pnpm-lock.yaml`.
+- Updated `eslint.config.mjs` to use `FlatCompat` for `next/core-web-vitals` under ESLint flat config.
+- Pinned `packageManager` to `pnpm@10.32.1` in `package.json`.
+- Added `vitest.config.ts` path alias support for `@/` imports.
+- Added baseline M1 unit tests: `lib/validations/auth.test.ts` and `lib/auth/redirects.test.ts`.
+- Added `*.tsbuildinfo` to `.gitignore` to avoid checking in local TypeScript incremental artifacts.
