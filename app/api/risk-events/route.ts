@@ -7,6 +7,7 @@ import {
   RiskEventServiceError,
   RiskEventSupplierValidationError,
 } from "@/lib/risk-events/ingestion";
+import { runRiskEventWorkflow } from "@/lib/risk-events/workflow";
 
 export async function GET(request: Request) {
   const contextResult = await requireOrgApiContext();
@@ -64,12 +65,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const { organizationId, supabase } = contextResult.context;
+  const { actorUserId, organizationId, supabase } = contextResult.context;
 
   try {
     const event = await ingestRiskEvent(supabase, organizationId, parsed.data);
+    const workflow = await runRiskEventWorkflow(supabase, {
+      actorUserId,
+      organizationId,
+      riskEventId: event.id,
+      supplierIds: event.supplierLinks.map((link) => link.supplierId),
+    });
+
     // 200 when dedup detected an existing event; 201 when newly created (M3.S3.a)
-    return apiSuccess(event, event.isDuplicate ? 200 : 201);
+    return apiSuccess({ event, workflow }, event.isDuplicate ? 200 : 201);
   } catch (err) {
     if (err instanceof RiskEventSupplierValidationError) {
       return apiError(

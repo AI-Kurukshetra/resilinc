@@ -78,3 +78,10 @@
 - Updated `POST /api/risk-events` to return HTTP 200 for duplicate events (M3.S3.a) and 201 for new ones.
 - Added `POST /api/risk-events/[eventId]/enrich` endpoint to trigger enrichment adapters on any existing event and persist updated payload + confidence.
 - Added optional `BRAVE_SEARCH_API_KEY` and `OPENWEATHERMAP_API_KEY` to `.env.example` for real adapter activation.
+- Added migration `supabase/migrations/20260314183000_m4_risk_alert_incident_workflows.sql` to extend `alerts` with owner/resolution fields, add `alert_events` timeline table + RLS policy, and enforce a partial unique index for active `incidents(alert_id)`.
+- Added risk scoring engine `lib/risk-scoring/engine.ts` with 30-day weighted scoring (`severity 40%`, `confidence 25%`, `criticality 25%`, `impact 10%`), recency decay (half-life 14 days), trend derivation (+/-3 flat band), explanation payload persistence, and recompute endpoint `POST /api/risk-scores/recompute`.
+- Added alert services/validation/routes for M4.S2: `lib/alerts/service.ts`, `lib/validations/alerts.ts`, `GET /api/alerts`, `POST /api/alerts/generate`, `POST /api/alerts/[alertId]/assign`, `POST /api/alerts/[alertId]/acknowledge`, and `POST /api/alerts/[alertId]/resolve`.
+- Added incident response playbook services/validation/routes for M4.S3: `lib/incidents/playbook.ts`, `lib/incidents/service.ts`, `lib/validations/incidents.ts`, `GET /api/incidents`, `GET /api/incidents/[incidentId]`, `POST /api/incidents/from-alert`, `POST /api/incidents/[incidentId]/actions/[actionId]/status`, and `POST /api/incidents/[incidentId]/close`.
+- Added post-ingestion M4 orchestration `lib/risk-events/workflow.ts` and integrated workflow execution into `POST /api/risk-events` and `POST /api/risk-events/[eventId]/enrich` so scoring -> alerts -> incident automation runs automatically with non-blocking warning summaries.
+- Updated API org context (`lib/api/org-context.ts`) to expose `actorUserId` for timeline/ownership attribution, including bypass-mode actor resolution.
+- Added M4 unit coverage: `lib/risk-scoring/engine.test.ts`, `lib/alerts/service.test.ts`, and `lib/incidents/service.test.ts`.

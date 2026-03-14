@@ -8,6 +8,7 @@ import {
 
 interface OrgApiContext {
   actorName: string;
+  actorUserId: string | null;
   organizationId: string;
   supabase: SupabaseClient;
 }
@@ -24,6 +25,11 @@ type OrgApiContextResult =
 
 const BYPASS_ACTOR_NAME = "Akash Bhavsar";
 const BYPASS_ORGANIZATION_NAME = "Apex Devices Group";
+
+interface BypassContextResult {
+  actorUserId: string | null;
+  organizationId: string | null;
+}
 
 function readUserDisplayName(user: User): string {
   const metadata = user.user_metadata;
@@ -47,22 +53,7 @@ function readUserDisplayName(user: User): string {
   return "Authenticated User";
 }
 
-async function resolveBypassOrganizationId(supabase: SupabaseClient): Promise<string | null> {
-  const { data: existingOrg, error: existingOrgError } = await supabase
-    .from("organizations")
-    .select("id")
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (existingOrgError) {
-    throw new Error(existingOrgError.message);
-  }
-
-  if (existingOrg?.id) {
-    return existingOrg.id;
-  }
-
+async function resolveBypassContext(supabase: SupabaseClient): Promise<BypassContextResult> {
   const { data: usersData, error: usersError } = await supabase.auth.admin.listUsers({
     page: 1,
     perPage: 1,
@@ -72,9 +63,23 @@ async function resolveBypassOrganizationId(supabase: SupabaseClient): Promise<st
     throw new Error(usersError.message);
   }
 
-  const demoUserId = usersData.users[0]?.id;
+  const demoUserId = usersData.users[0]?.id ?? null;
   if (!demoUserId) {
-    return null;
+    return {
+      actorUserId: null,
+      organizationId: null,
+    };
+  }
+
+  const { data: existingOrg, error: existingOrgError } = await supabase
+    .from("organizations")
+    .select("id")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (existingOrgError) {
+    throw new Error(existingOrgError.message);
   }
 
   const { error: profileError } = await supabase.from("profiles").upsert(
@@ -87,6 +92,13 @@ async function resolveBypassOrganizationId(supabase: SupabaseClient): Promise<st
 
   if (profileError) {
     throw new Error(profileError.message);
+  }
+
+  if (existingOrg?.id) {
+    return {
+      actorUserId: demoUserId,
+      organizationId: existingOrg.id,
+    };
   }
 
   const { data: createdOrg, error: createdOrgError } = await supabase
@@ -115,16 +127,19 @@ async function resolveBypassOrganizationId(supabase: SupabaseClient): Promise<st
     throw new Error(membershipError.message);
   }
 
-  return createdOrg.id;
+  return {
+    actorUserId: demoUserId,
+    organizationId: createdOrg.id,
+  };
 }
 
 export async function requireOrgApiContext(): Promise<OrgApiContextResult> {
   if (isAuthBypassEnabled()) {
     try {
       const supabase = createServiceRoleSupabaseClient();
-      const organizationId = await resolveBypassOrganizationId(supabase);
+      const bypassContext = await resolveBypassContext(supabase);
 
-      if (!organizationId) {
+      if (!bypassContext.organizationId || !bypassContext.actorUserId) {
         return {
           context: null,
           errorResponse: apiError(
@@ -140,7 +155,8 @@ export async function requireOrgApiContext(): Promise<OrgApiContextResult> {
       return {
         context: {
           actorName: BYPASS_ACTOR_NAME,
-          organizationId,
+          actorUserId: bypassContext.actorUserId,
+          organizationId: bypassContext.organizationId,
           supabase,
         },
         errorResponse: null,
@@ -215,6 +231,7 @@ export async function requireOrgApiContext(): Promise<OrgApiContextResult> {
   return {
     context: {
       actorName: readUserDisplayName(user),
+      actorUserId: user.id,
       organizationId: membership.organization_id,
       supabase,
     },

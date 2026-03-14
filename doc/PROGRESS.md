@@ -28,3 +28,43 @@
 [2026-03-14 17:29] coordinator — Added `SUPABASE_SERVICE_ROLE_KEY` locally, created demo user (`akash.bhavsar@bacancy.com`), applied remote `20260314170000_m2_hardening.sql`, and ran `supabase/seed.sql` via Management API; verified remote counts (`suppliers=5`, `facilities=7`, `parts=8`).
 [2026-03-14 17:46] $api-endpoint — Completed M3.S1 risk event ingestion pipeline: added `lib/validations/risk-events.ts` (Zod schemas with future-date guard on observedAt, confidence precision rounding, supplier ID dedup limit), `lib/risk-events/ingestion.ts` (service layer: pre-validates supplier IDs by org before insert, creates risk_events + risk_event_suppliers atomically), replaced `app/api/risk-events/route.ts` scaffold, and added `app/api/risk-events/[eventId]/route.ts`; passed `pnpm typecheck`.
 [2026-03-14 17:56] $risk-intelligence-ingestion — Completed M3.S2 and M3.S3: added `lib/risk-events/enrichment.ts` (WebSearchAdapter + WeatherRiskAdapter with real API + stub fallback, confidence rubric, payload builders); extended `ingestion.ts` with dedup check (event_type+region+observed_at±1h+source → 200+isDuplicate), provenance `_provenance` always written, low-confidence `_review` flag when confidence<0.5, optional `autoEnrich` enrichment at ingest time; added `POST /api/risk-events/[eventId]/enrich` endpoint; added optional env keys to `.env.example`; passed `pnpm typecheck`.
+[2026-03-14 18:13] $risk-scoring — Completed M4.S1 weighted supplier risk scoring with trend/explanation persistence.
+  Output files:
+    + lib/risk-scoring/engine.ts
+    + lib/validations/risk-scoring.ts
+    + app/api/risk-scores/recompute/route.ts
+    + lib/risk-scoring/engine.test.ts
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓
+  Next handoff to: $api-endpoint — implement alert threshold APIs and lifecycle timeline tracking.
+
+[2026-03-14 18:13] $api-endpoint — Completed M4.S2 alert generation/lifecycle APIs with owner assignment and alert timeline events.
+  Output files:
+    + supabase/migrations/20260314183000_m4_risk_alert_incident_workflows.sql
+    + lib/alerts/service.ts
+    + lib/validations/alerts.ts
+    + app/api/alerts/route.ts
+    + app/api/alerts/generate/route.ts
+    + app/api/alerts/[alertId]/assign/route.ts
+    + app/api/alerts/[alertId]/acknowledge/route.ts
+    + app/api/alerts/[alertId]/resolve/route.ts
+    + lib/alerts/service.test.ts
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓
+  Next handoff to: $incident-response-playbook — implement incident automation/playbook actions and closure enforcement.
+
+[2026-03-14 18:13] $incident-response-playbook — Completed M4.S3 incident creation automation, action transitions, and closure rules; wired post-ingestion workflow orchestration.
+  Output files:
+    + lib/incidents/playbook.ts
+    + lib/incidents/service.ts
+    + lib/validations/incidents.ts
+    + app/api/incidents/route.ts
+    + app/api/incidents/[incidentId]/route.ts
+    + app/api/incidents/from-alert/route.ts
+    + app/api/incidents/[incidentId]/actions/[actionId]/status/route.ts
+    + app/api/incidents/[incidentId]/close/route.ts
+    + lib/risk-events/workflow.ts
+    + app/api/risk-events/route.ts
+    + app/api/risk-events/[eventId]/enrich/route.ts
+    + lib/incidents/service.test.ts
+  Checks passed: ./scripts/preflight.sh ✓
+  Next handoff to: $frontend-design — implement M5 supplier/alert/incident UI against new APIs.
+[2026-03-14 18:13] coordinator — Completed M4.S1/M4.S2/M4.S3 backend implementation (scoring -> alerts -> incidents), validated with preflight.

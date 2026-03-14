@@ -67,18 +67,18 @@ Reference: `doc/blueprint/E2E_DEVELOPMENT_PLAN.md`
 - [x] (2026-03-14 17:56) M3.S3.c Low-confidence fallback
 
 ### M4 Risk Scoring, Alerts, and Incident Workflows
-- [ ] M4.S1 Risk scoring engine
-- [ ] M4.S1.a Weighted formula
-- [ ] M4.S1.b Trend logic
-- [ ] M4.S1.c Explanation payload
-- [ ] M4.S2 Alert generation and acknowledgment
-- [ ] M4.S2.a Threshold rules
-- [ ] M4.S2.b Acknowledge/resolve endpoints
-- [ ] M4.S2.c Owner/timeline fields
-- [ ] M4.S3 Incident and action management
-- [ ] M4.S3.a Incident from alert
-- [ ] M4.S3.b Playbook generation
-- [ ] M4.S3.c Action transitions and closure
+- [x] (2026-03-14 18:13) M4.S1 Risk scoring engine
+- [x] (2026-03-14 18:13) M4.S1.a Weighted formula
+- [x] (2026-03-14 18:13) M4.S1.b Trend logic
+- [x] (2026-03-14 18:13) M4.S1.c Explanation payload
+- [x] (2026-03-14 18:13) M4.S2 Alert generation and acknowledgment
+- [x] (2026-03-14 18:13) M4.S2.a Threshold rules
+- [x] (2026-03-14 18:13) M4.S2.b Acknowledge/resolve endpoints
+- [x] (2026-03-14 18:13) M4.S2.c Owner/timeline fields
+- [x] (2026-03-14 18:13) M4.S3 Incident and action management
+- [x] (2026-03-14 18:13) M4.S3.a Incident from alert
+- [x] (2026-03-14 18:13) M4.S3.b Playbook generation
+- [x] (2026-03-14 18:13) M4.S3.c Action transitions and closure
 
 ### M5 Dashboard and Workflow UI
 - [ ] M5.S1 Overview dashboard

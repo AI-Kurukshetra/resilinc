@@ -2,6 +2,7 @@ import { apiError, apiSuccess, zodFieldErrors } from "@/lib/api/responses";
 import { requireOrgApiContext } from "@/lib/api/org-context";
 import { RiskEventIdParamSchema } from "@/lib/validations/risk-events";
 import { enrichRiskEvent, RiskEventServiceError } from "@/lib/risk-events/ingestion";
+import { runRiskEventWorkflow } from "@/lib/risk-events/workflow";
 
 interface EnrichRouteContext {
   params: Promise<{ eventId: string }>;
@@ -29,11 +30,17 @@ export async function POST(_request: Request, { params }: EnrichRouteContext) {
     return contextResult.errorResponse;
   }
 
-  const { organizationId, supabase } = contextResult.context;
+  const { actorUserId, organizationId, supabase } = contextResult.context;
 
   try {
     const event = await enrichRiskEvent(supabase, organizationId, paramParsed.data.eventId);
-    return apiSuccess(event);
+    const workflow = await runRiskEventWorkflow(supabase, {
+      actorUserId,
+      organizationId,
+      riskEventId: event.id,
+      supplierIds: event.supplierLinks.map((link) => link.supplierId),
+    });
+    return apiSuccess({ event, workflow });
   } catch (err) {
     if (err instanceof RiskEventServiceError) {
       return apiError({ code: err.code, message: err.message }, err.status);

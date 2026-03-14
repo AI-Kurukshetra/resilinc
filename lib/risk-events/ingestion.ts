@@ -144,8 +144,7 @@ async function findDuplicateEventId(
   const windowStart = new Date(observed - windowMs).toISOString();
   const windowEnd = new Date(observed + windowMs).toISOString();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let q = (supabase as any)
+  let q = supabase
     .from("risk_events")
     .select("id")
     .eq("organization_id", organizationId)

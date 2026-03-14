@@ -3,6 +3,7 @@
 ## Migrations
 - `supabase/migrations/20260314110000_init_resilinc_mvp.sql`
 - `supabase/migrations/20260314170000_m2_hardening.sql`
+- `supabase/migrations/20260314183000_m4_risk_alert_incident_workflows.sql`
 
 ## Core Tables
 - `organizations`
@@ -16,6 +17,7 @@
 - `risk_event_suppliers`
 - `supplier_risk_scores`
 - `alerts`
+- `alert_events`
 - `incidents`
 - `incident_actions`
 
@@ -24,7 +26,8 @@
 - Supplier -> facilities (`facilities.supplier_id`)
 - Supplier <-> parts (`supplier_parts` join with `tier_level`)
 - Risk events <-> suppliers (`risk_event_suppliers`)
-- Alerts optionally reference supplier + risk event
+- Alerts optionally reference supplier + risk event, plus owner/ack/resolution actors
+- Alert events append lifecycle timeline entries for generated/escalated/owner_assigned/acknowledged/resolved state changes
 - Incidents reference alerts; incident actions reference incidents
 
 ## RLS Model
@@ -32,6 +35,7 @@
 - Org-scoped tables enforce membership with `public.is_org_member(organization_id)`.
 - Owner checks now use `public.is_org_owner(organization_id)` for membership mutations.
 - Profiles are self-scoped (`user_id = (select auth.uid())`).
+- `alert_events` is org-scoped with dedicated `org_scoped_alert_events` policy.
 
 ### `organization_members` policy hardening (M2.S1)
 - Replaced permissive self-insert/update behavior with:
@@ -49,6 +53,20 @@ Added in `20260314170000_m2_hardening.sql`:
 - `idx_risk_event_suppliers_org_supplier`
 - `suppliers_org_name_key` unique (`organization_id`, `name`)
 - `facilities_org_supplier_name_key` unique (`organization_id`, `supplier_id`, `name`)
+
+Added in `20260314183000_m4_risk_alert_incident_workflows.sql`:
+- `idx_alert_events_org_created_at_desc`
+- `idx_alert_events_alert_created_at_asc`
+- `idx_alert_events_org_event_type`
+- `idx_incidents_active_alert_unique` partial unique (`alert_id`) where status in (`open`, `in_progress`)
+
+## M4 Alert/Incident Columns
+`alerts` additions:
+- `owner_id` -> `profiles(user_id)`
+- `owner_assigned_at`
+- `resolved_by` -> `profiles(user_id)`
+- `resolved_at`
+- `resolution_note`
 
 ## Seed Strategy (M2.S1.b)
 File: `supabase/seed.sql`

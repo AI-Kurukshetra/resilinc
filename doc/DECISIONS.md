@@ -113,3 +113,18 @@ Rationale: Source traceability is a core audit requirement; embedding provenance
 
 ## 2026-03-14 — Flag low-confidence events with _review block in payload rather than a separate DB column
 Rationale: Adding a status column would require a migration; storing _review in the existing jsonb payload keeps M3.S3.c within the current schema and allows richer review metadata (reason, threshold, confidence value) without altering the table contract.
+
+## 2026-03-14 — Use weighted supplier risk scoring with 30-day recency decay
+Rationale: A 30-day window with half-life decay balances responsiveness to new disruptions against short-term noise; the explicit 40/25/25/10 weight split keeps scoring explainable for demo and review.
+
+## 2026-03-14 — Persist alert lifecycle history in normalized `alert_events` instead of JSON blobs
+Rationale: Event rows provide queryable ownership/acknowledgement/resolution timelines and cleaner audit semantics than embedding timeline arrays inside `alerts`.
+
+## 2026-03-14 — Keep alert resolution explicit and never auto-resolve on score drops
+Rationale: Operational workflows require human confirmation of mitigation completion; automatic closure from score decay risks hiding unresolved real-world incidents.
+
+## 2026-03-14 — Auto-create incidents only for severity 4+ alerts with playbook templates
+Rationale: Restricting automation to high-severity alerts avoids incident noise while still demonstrating end-to-end response orchestration for critical supplier risk breaches.
+
+## 2026-03-14 — Enforce incident closure gate on both action completion and alert resolution
+Rationale: Requiring all actions `done` and parent alert `resolved` guarantees that incident closure reflects completed response work rather than status drift.
