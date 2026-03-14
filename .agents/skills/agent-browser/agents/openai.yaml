@@ -1,0 +1,8 @@
+name: agent-browser
+description: agent-browser skill metadata
+invocation:
+  policy: implicit
+tools:
+  - type: file_read
+  - type: file_write
+  - type: shell

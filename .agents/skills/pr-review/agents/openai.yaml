@@ -1,0 +1,8 @@
+name: pr-review
+description: pr-review skill metadata
+invocation:
+  policy: explicit
+tools:
+  - type: file_read
+  - type: file_write
+  - type: shell

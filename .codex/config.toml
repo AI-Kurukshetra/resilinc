@@ -1,0 +1,18 @@
+[experimental]
+multi_agent = true
+
+[agents.frontend]
+description = "Handles UI, components, and styling tasks."
+config_file = ".codex/agents/frontend.toml"
+
+[agents.backend]
+description = "Handles API routes, Supabase queries, and migrations."
+config_file = ".codex/agents/backend.toml"
+
+[agents.tester]
+description = "Runs unit and E2E tests."
+config_file = ".codex/agents/tester.toml"
+
+[agents.reviewer]
+description = "Performs risk-first code review."
+config_file = ".codex/agents/reviewer.toml"
