@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 interface AuthenticatedOrgSession {
@@ -22,6 +22,17 @@ function getSupabasePublicEnv() {
   return { url, anonKey };
 }
 
+function getSupabaseServiceRoleEnv() {
+  const { url } = getSupabasePublicEnv();
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) {
+    throw new Error("Missing required env: SUPABASE_SERVICE_ROLE_KEY");
+  }
+
+  return { serviceRoleKey, url };
+}
+
 export async function createServerSupabaseClient(): Promise<SupabaseClient> {
   const cookieStore = await cookies();
   const { url, anonKey } = getSupabasePublicEnv();
@@ -40,6 +51,17 @@ export async function createServerSupabaseClient(): Promise<SupabaseClient> {
           // Server Components cannot always write cookies; middleware handles refresh.
         }
       },
+    },
+  });
+}
+
+export function createServiceRoleSupabaseClient(): SupabaseClient {
+  const { url, serviceRoleKey } = getSupabaseServiceRoleEnv();
+
+  return createClient(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
     },
   });
 }

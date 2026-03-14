@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { isAuthBypassEnabled } from "@/lib/auth/feature-flags";
 import {
   DEFAULT_AUTHENTICATED_REDIRECT,
   DEFAULT_UNAUTHENTICATED_REDIRECT,
@@ -7,12 +8,18 @@ import {
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
+  if (isAuthBypassEnabled()) {
+    return NextResponse.next();
+  }
+
   const { response, user } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
   const isAuthenticated = Boolean(user);
   const isApiRoute = pathname.startsWith("/api");
-  const isAuthPage =
+  const isGuestAuthPage =
     pathname === "/login" || pathname === "/signup" || pathname === "/reset-password";
+  const isNeutralAuthPage =
+    pathname === "/logout" || pathname === "/update-password" || pathname === "/auth/callback";
 
   if (isApiRoute) {
     return response;
@@ -26,11 +33,11 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  if (isAuthenticated && isAuthPage) {
+  if (isAuthenticated && isGuestAuthPage) {
     return redirectWithSessionCookies(request, DEFAULT_AUTHENTICATED_REDIRECT, response);
   }
 
-  if (!isAuthenticated && !isAuthPage) {
+  if (!isAuthenticated && !isGuestAuthPage && !isNeutralAuthPage) {
     const nextPath = `${pathname}${search}`;
     return redirectWithSessionCookies(
       request,

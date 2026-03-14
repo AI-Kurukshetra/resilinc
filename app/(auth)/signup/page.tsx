@@ -10,13 +10,9 @@ export const metadata: Metadata = {
 };
 
 interface SignupPageProps {
-  searchParams?:
-    | Promise<{
-        next?: string | string[];
-      }>
-    | {
-        next?: string | string[];
-      };
+  searchParams?: Promise<{
+    next?: string | string[];
+  }>;
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {

@@ -3,6 +3,7 @@ import {
   LoginRequestSchema,
   ResetPasswordRequestSchema,
   SignupRequestSchema,
+  UpdatePasswordRequestSchema,
 } from "@/lib/validations/auth";
 
 describe("auth validation schemas", () => {
@@ -42,6 +43,24 @@ describe("auth validation schemas", () => {
   it("rejects reset payload with invalid email", () => {
     const parsed = ResetPasswordRequestSchema.safeParse({
       email: "not-an-email",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("accepts valid update-password payload", () => {
+    const parsed = UpdatePasswordRequestSchema.safeParse({
+      password: "new-password-123",
+      confirmPassword: "new-password-123",
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("rejects update-password payload when confirmation mismatches", () => {
+    const parsed = UpdatePasswordRequestSchema.safeParse({
+      password: "new-password-123",
+      confirmPassword: "not-matching",
     });
 
     expect(parsed.success).toBe(false);

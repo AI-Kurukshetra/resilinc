@@ -5,6 +5,7 @@ export interface ApiErrorPayload {
   code: string;
   message: string;
   fieldErrors?: Record<string, string[]>;
+  retryAfterSeconds?: number;
 }
 
 export interface ApiErrorResponse {

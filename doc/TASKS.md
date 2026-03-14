@@ -12,6 +12,14 @@
 - [x] (2026-03-14 11:20) Add implementation control loop (`IMPLEMENTATION_STATE`, `SKILL_ROUTER`, `PROMPT_APPENDIX`, `scripts/preflight.sh`).
 - [x] (2026-03-14 11:42) Add comprehensive blueprint-driven E2E execution plan, subtask prompts, and upgraded `suffix_prompt.md`.
 - [x] (2026-03-14 14:02) Configure `pnpm` and execute previously skipped M1 quality gates (`lint`, `typecheck`, `test`) with fixes.
+- [x] (2026-03-14 14:47) Hotfix M1 auth: handle Supabase email rate-limits and implement working reset-password recovery callback/update flow.
+- [x] (2026-03-14 14:53) Improve reset-email cooldown reliability with dynamic wait parsing + persisted cooldown buffer to avoid repeated provider throttling.
+- [x] (2026-03-14 16:36) Apply remote Supabase MVP migration to hosted project via Management API and verify required tables/RLS now exist.
+- [x] (2026-03-14 16:40) Hotfix M1 dashboard access: auto-bootstrap personal organization + owner membership for authenticated users without existing org membership.
+- [x] (2026-03-14 16:46) Add temporary `AUTH_BYPASS_ENABLED` switch to disable auth guards in middleware/dashboard and enable direct app access for local development.
+- [x] (2026-03-14 17:13) Force demo actor context for bypass mode: all API org access resolves as `Akash Bhavsar` when `AUTH_BYPASS_ENABLED=true`.
+- [x] (2026-03-14 17:18) Replace overview placeholder with live data dashboard cards/lists (suppliers, facilities, parts, alerts/incidents) for bypass-mode demo usability.
+- [x] (2026-03-14 17:29) Configure local `SUPABASE_SERVICE_ROLE_KEY`, create demo auth user, apply remote M2 hardening migration, and seed remote demo data for populated overview.
 
 ## E2E Blueprint Execution Plan (Track by ID)
 Reference: `doc/blueprint/E2E_DEVELOPMENT_PLAN.md`
@@ -31,32 +39,32 @@ Reference: `doc/blueprint/E2E_DEVELOPMENT_PLAN.md`
 - [x] (2026-03-14 13:48) M1.S3.c Unauthorized/error states
 
 ### M2 Core Data and Supply Chain Mapping
-- [ ] M2.S1 Migration hardening and seed strategy
-- [ ] M2.S1.a Validate migration and patch gaps
-- [ ] M2.S1.b Seed script strategy
-- [ ] M2.S1.c SCHEMA doc updates
-- [ ] M2.S2 CRUD APIs for suppliers/facilities/parts
-- [ ] M2.S2.a CRUD handlers
-- [ ] M2.S2.b Zod validation
-- [ ] M2.S2.c Org authorization checks
-- [ ] M2.S3 Supply chain mapping service
-- [ ] M2.S3.a Tier links logic
-- [ ] M2.S3.b Exposure helpers
-- [ ] M2.S3.c UI DTO output
+- [x] (2026-03-14 17:08) M2.S1 Migration hardening and seed strategy
+- [x] (2026-03-14 17:08) M2.S1.a Validate migration and patch gaps
+- [x] (2026-03-14 17:08) M2.S1.b Seed script strategy
+- [x] (2026-03-14 17:08) M2.S1.c SCHEMA doc updates
+- [x] (2026-03-14 17:08) M2.S2 CRUD APIs for suppliers/facilities/parts
+- [x] (2026-03-14 17:08) M2.S2.a CRUD handlers
+- [x] (2026-03-14 17:08) M2.S2.b Zod validation
+- [x] (2026-03-14 17:08) M2.S2.c Org authorization checks
+- [x] (2026-03-14 17:08) M2.S3 Supply chain mapping service
+- [x] (2026-03-14 17:08) M2.S3.a Tier links logic
+- [x] (2026-03-14 17:08) M2.S3.b Exposure helpers
+- [x] (2026-03-14 17:08) M2.S3.c UI DTO output
 
 ### M3 Risk Ingestion + MCP Enrichment
-- [ ] M3.S1 Risk event ingestion pipeline
-- [ ] M3.S1.a Ingestion contract
-- [ ] M3.S1.b Event normalization
-- [ ] M3.S1.c Supplier/facility impact mapping
-- [ ] M3.S2 MCP enrichment adapters
-- [ ] M3.S2.a Web search adapter
-- [ ] M3.S2.b Weather adapter
-- [ ] M3.S2.c Payload schema + confidence rubric
-- [ ] M3.S3 Deduplication and provenance tracking
-- [ ] M3.S3.a Dedupe keys
-- [ ] M3.S3.b Source provenance persistence
-- [ ] M3.S3.c Low-confidence fallback
+- [x] (2026-03-14 17:46) M3.S1 Risk event ingestion pipeline
+- [x] (2026-03-14 17:46) M3.S1.a Ingestion contract
+- [x] (2026-03-14 17:46) M3.S1.b Event normalization
+- [x] (2026-03-14 17:46) M3.S1.c Supplier/facility impact mapping
+- [x] (2026-03-14 17:56) M3.S2 MCP enrichment adapters
+- [x] (2026-03-14 17:56) M3.S2.a Web search adapter
+- [x] (2026-03-14 17:56) M3.S2.b Weather adapter
+- [x] (2026-03-14 17:56) M3.S2.c Payload schema + confidence rubric
+- [x] (2026-03-14 17:56) M3.S3 Deduplication and provenance tracking
+- [x] (2026-03-14 17:56) M3.S3.a Dedupe keys
+- [x] (2026-03-14 17:56) M3.S3.b Source provenance persistence
+- [x] (2026-03-14 17:56) M3.S3.c Low-confidence fallback
 
 ### M4 Risk Scoring, Alerts, and Incident Workflows
 - [ ] M4.S1 Risk scoring engine
@@ -101,10 +109,10 @@ Reference: `doc/blueprint/E2E_DEVELOPMENT_PLAN.md`
 - [ ] M6.S3.c Log residual risks
 
 ### M7 Deployment, Demo, and Submission Pack
-- [ ] M7.S1 Vercel deployment setup
-- [ ] M7.S1.a Env and runtime config
-- [ ] M7.S1.b Production health checks
-- [ ] M7.S1.c Post-deploy smoke test
+- [~] (2026-03-14 15:42) M7.S1 Vercel deployment setup (production live, GitHub auto-deploy blocked on missing Vercel GitHub login connection)
+- [x] (2026-03-14 15:17) M7.S1.a Env and runtime config
+- [x] (2026-03-14 15:42) M7.S1.b Production health checks
+- [x] (2026-03-14 15:42) M7.S1.c Post-deploy smoke test
 - [ ] M7.S2 Demo data and script stabilization
 - [ ] M7.S2.a Seed validation
 - [ ] M7.S2.b First-login populated dashboard validation

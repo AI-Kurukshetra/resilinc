@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { normalizeAuthError } from "@/lib/auth/auth-errors";
 import {
   apiError,
   apiSuccess,
@@ -25,19 +26,25 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createServerSupabaseClient();
-    const redirectTo = `${request.nextUrl.origin}/login`;
+    const redirectTo = `${request.nextUrl.origin}/auth/callback?next=/update-password`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
       redirectTo,
     });
 
     if (error) {
+      const normalized = normalizeAuthError(
+        error,
+        "AUTH_RESET_FAILED",
+        "Failed to send reset email",
+      );
       return apiError(
         {
-          code: "AUTH_RESET_FAILED",
-          message: error.message || "Failed to send reset email",
+          code: normalized.code,
+          message: normalized.message,
+          retryAfterSeconds: normalized.retryAfterSeconds,
         },
-        400,
+        normalized.status,
       );
     }
 

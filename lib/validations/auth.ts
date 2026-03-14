@@ -37,6 +37,17 @@ export const ResetPasswordRequestSchema = z.object({
   email: EmailSchema,
 });
 
+export const UpdatePasswordRequestSchema = z
+  .object({
+    password: PasswordSchema,
+    confirmPassword: z.string().min(1, "Confirm your password"),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 export type SignupRequest = z.infer<typeof SignupRequestSchema>;
 export type ResetPasswordRequest = z.infer<typeof ResetPasswordRequestSchema>;
+export type UpdatePasswordRequest = z.infer<typeof UpdatePasswordRequestSchema>;

@@ -10,15 +10,11 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams?:
-    | Promise<{
-        next?: string | string[];
-        checkEmail?: string | string[];
-      }>
-    | {
-        next?: string | string[];
-        checkEmail?: string | string[];
-      };
+  searchParams?: Promise<{
+    next?: string | string[];
+    checkEmail?: string | string[];
+    passwordReset?: string | string[];
+  }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -34,6 +30,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const nextPath = sanitizeNextPath(readSingleParam(params?.next), "/overview");
   const showCheckEmailNotice = readSingleParam(params?.checkEmail) === "1";
+  const showPasswordResetNotice = readSingleParam(params?.passwordReset) === "1";
 
   return (
     <AuthPageShell
@@ -50,6 +47,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       {showCheckEmailNotice ? (
         <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
           Check your inbox to confirm your account, then sign in.
+        </p>
+      ) : null}
+      {showPasswordResetNotice ? (
+        <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          Password reset complete. Sign in with your new password.
         </p>
       ) : null}
       <LoginForm nextPath={nextPath} />

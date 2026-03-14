@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { normalizeAuthError } from "@/lib/auth/auth-errors";
 import {
   apiError,
   apiSuccess,
@@ -37,12 +38,18 @@ export async function POST(request: Request) {
 
     if (error) {
       const hasConflict = error.message.toLowerCase().includes("already");
+      const normalized = normalizeAuthError(
+        error,
+        hasConflict ? "AUTH_USER_EXISTS" : "AUTH_SIGNUP_FAILED",
+        "Unable to create account",
+      );
       return apiError(
         {
-          code: hasConflict ? "AUTH_USER_EXISTS" : "AUTH_SIGNUP_FAILED",
-          message: error.message || "Unable to create account",
+          code: normalized.code,
+          message: normalized.message,
+          retryAfterSeconds: normalized.retryAfterSeconds,
         },
-        hasConflict ? 409 : 400,
+        hasConflict ? 409 : normalized.status,
       );
     }
 

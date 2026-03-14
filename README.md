@@ -10,6 +10,23 @@ This repository contains the architecture blueprint and foundation scaffold for 
 4. `pnpm dev`
 5. `./scripts/preflight.sh`
 
+## Vercel Deployment (GitHub Auto-Deploy)
+
+1. Push `main` to GitHub (`https://github.com/AI-Kurukshetra/resilinc`).
+2. Import the repo in Vercel and enable automatic deployments from GitHub.
+3. In Vercel Project Settings -> Environment Variables, set:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Deploy and verify:
+   - App loads at the assigned Vercel URL.
+   - `GET /api/health` returns `200` and `"status":"ok"`.
+
+Optional CLI flow:
+- `vercel link`
+- `vercel env add NEXT_PUBLIC_SUPABASE_URL production`
+- `vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production`
+- `vercel --prod`
+
 ## Core Docs
 
 - `doc/blueprint/problem_understanding.md`

@@ -30,3 +30,51 @@
 - Added `vitest.config.ts` path alias support for `@/` imports.
 - Added baseline M1 unit tests: `lib/validations/auth.test.ts` and `lib/auth/redirects.test.ts`.
 - Added `*.tsbuildinfo` to `.gitignore` to avoid checking in local TypeScript incremental artifacts.
+- Added auth error normalization helper `lib/auth/auth-errors.ts` to classify Supabase rate-limit responses (`AUTH_RATE_LIMITED`) with retry hints.
+- Updated `POST /api/auth/reset` to use recovery callback redirect (`/auth/callback?next=/update-password`) and return explicit rate-limit payloads.
+- Updated `POST /api/auth/signup` to normalize auth errors, including rate-limit behavior.
+- Added auth callback route `app/auth/callback/route.ts` to exchange/verify recovery tokens and redirect safely.
+- Added password-update recovery flow UI: `app/(auth)/update-password/page.tsx` and `app/(auth)/_components/update-password-form.tsx`.
+- Updated reset-password form UX to enforce cooldown on rate-limit responses and show wait timer.
+- Updated middleware route rules so `/auth/callback` and `/update-password` are reachable during recovery.
+- Added regression tests for auth error normalization and update-password validation (`lib/auth/auth-errors.test.ts`, expanded `lib/validations/auth.test.ts`).
+- Enhanced auth rate-limit normalization to parse provider wait durations and render human-readable wait labels.
+- Improved reset-password cooldown UX to persist cooldown in localStorage and apply a safety buffer before allowing resend.
+- Added production readiness endpoint `GET /api/health` (`app/api/health/route.ts`) with required-env checks and status-based HTTP response (`200`/`503`).
+- Updated auth page prop typings in `app/(auth)/login/page.tsx`, `app/(auth)/signup/page.tsx`, and `app/(auth)/update-password/page.tsx` to align with Next.js 15 `searchParams` Promise contract and unblock `next build`.
+- Added explicit Vercel + GitHub auto-deploy setup steps to `README.md`, including required production env vars and health-check validation flow.
+- Linked local repo to Vercel project `resilinc` (created `.vercel/project.json`) and configured production env vars `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Deployed production release and assigned alias `https://resilinc.vercel.app`.
+- Validated production runtime with smoke checks: `GET /api/health` (`200`, status `ok`) and `GET /login` (`200`).
+- Applied remote SQL migration `supabase/migrations/20260314110000_init_resilinc_mvp.sql` through Supabase Management API `POST /v1/projects/{ref}/database/query` to bypass local IPv6 DB connectivity limits.
+- Verified remote schema includes all MVP tables (`profiles`, `organization_members`, `suppliers`, `facilities`, `parts`, `supplier_parts`, `risk_events`, `risk_event_suppliers`, `supplier_risk_scores`, `alerts`, `incidents`, `incident_actions`, `organizations`) and `17` `public` RLS policies.
+- Updated `app/(dashboard)/layout.tsx` organization guard flow to bootstrap first-login workspace membership: if authenticated user lacks `organization_members`, create `organizations` row and owner membership automatically.
+- Added personal workspace naming fallback (`<full_name|email-handle> Workspace`) and explicit setup failure state messaging for workspace bootstrap failures.
+- Added `lib/auth/feature-flags.ts` with `isAuthBypassEnabled()` and wired temporary auth bypass behavior into `middleware.ts` and `app/(dashboard)/layout.tsx`.
+- Updated `.env.example` with `AUTH_BYPASS_ENABLED=false` and enabled `AUTH_BYPASS_ENABLED=true` in local `.env` for temporary direct app access.
+- Added migration `supabase/migrations/20260314170000_m2_hardening.sql` to harden org-member RLS policies, add `is_org_owner()` helper, and expand index/constraint coverage for supply-chain entities.
+- Implemented idempotent realistic seed strategy in `supabase/seed.sql` (demo org + suppliers/facilities/parts/tier links) and enabled seed execution in `supabase/config.toml`.
+- Added supply-chain validation contracts in `lib/validations/supply-chain.ts` and tests in `lib/validations/supply-chain.test.ts`.
+- Added shared API infrastructure for org-scoped handlers: `lib/api/org-context.ts` and `lib/api/db-errors.ts`.
+- Added M2 CRUD endpoints: `app/api/suppliers/*`, `app/api/facilities/*`, and `app/api/parts/*` with Zod validation, org authorization, pagination, and structured errors.
+- Added M2 mapping service `lib/supply-chain/mapping.ts` and endpoints `app/api/supply-chain/links/route.ts`, `app/api/supply-chain/exposure/[supplierId]/route.ts`, and `app/api/supply-chain/network/route.ts` returning UI-ready DTOs.
+- Added `createServiceRoleSupabaseClient()` to `lib/supabase/server.ts` for server-only privileged operations.
+- Updated `lib/api/org-context.ts` so bypass mode (`AUTH_BYPASS_ENABLED=true`) no longer requires auth session and instead resolves a shared demo org context with actor name fixed to `Akash Bhavsar` for all API callers.
+- Updated `app/(dashboard)/overview/page.tsx` to show the active user label and pin it to `Akash Bhavsar` in bypass mode.
+- Reworked `app/(dashboard)/overview/page.tsx` from static scaffold to data-backed dashboard sections:
+  - KPI cards (`suppliers`, `high-risk suppliers`, `open alerts`, `open incidents`)
+  - recent suppliers/facilities/parts lists
+  - explicit bypass-mode warning when service-role context is unavailable.
+- Configured local `.env` with `SUPABASE_SERVICE_ROLE_KEY` for bypass-mode server context resolution.
+- Created demo auth user (`akash.bhavsar@bacancy.com`) via Supabase Admin API to satisfy `organizations.created_by` foreign key for bootstrap.
+- Applied remote migration `supabase/migrations/20260314170000_m2_hardening.sql` and then remote `supabase/seed.sql`, resulting in populated demo data (`5 suppliers`, `7 facilities`, `8 parts`).
+- Added risk event ingestion validation schemas in `lib/validations/risk-events.ts` (M3.S1.a/b): `RiskEventCreateSchema` (eventType, severity, confidence, regionCode, sourceUrl, sourceName, observedAt, summary, payload, affectedSupplierIds, impactLevel), `RiskEventListQuerySchema`, `RiskEventIdParamSchema`.
+- Added risk event service layer `lib/risk-events/ingestion.ts` with `ingestRiskEvent()`, `listRiskEvents()`, and `getRiskEventById()`; service pre-validates supplier IDs against org before any DB write and deduplicates `affectedSupplierIds` to prevent unique-constraint violations.
+- Replaced `app/api/risk-events/route.ts` scaffold with real `GET` (list with filters: regionCode, eventType, minSeverity, supplierId) and `POST` (ingest, returns 201 with full `RiskEventDetailDTO` including supplier links).
+- Added `app/api/risk-events/[eventId]/route.ts` for single event detail retrieval with embedded `supplierLinks` array.
+- Added `lib/risk-events/enrichment.ts` (M3.S2): `WebSearchAdapter` (Brave Search API with deterministic stub fallback), `WeatherRiskAdapter` (OpenWeatherMap with region-aware stub fallback), `computeEnrichedConfidence()` confidence rubric (40% base + 30% source count + 30% freshness), and payload builders (`buildProvenance`, `buildEnrichmentPayload`, `buildLowConfidenceFlag`).
+- Extended `lib/risk-events/ingestion.ts` with M3.S3 pipeline: dedup check on `(event_type, region_code, observed_at ±1h, source)` returns existing event with `isDuplicate: true`; provenance always written to payload `_provenance`; low-confidence events (`confidence < 0.5`) flagged with `_review` block and `reviewRequired: true` in DTO.
+- Added `autoEnrich: boolean` (default `false`) to `RiskEventCreateSchema`; when `true`, web search + weather adapters run during ingest and confidence is recomputed.
+- Updated `POST /api/risk-events` to return HTTP 200 for duplicate events (M3.S3.a) and 201 for new ones.
+- Added `POST /api/risk-events/[eventId]/enrich` endpoint to trigger enrichment adapters on any existing event and persist updated payload + confidence.
+- Added optional `BRAVE_SEARCH_API_KEY` and `OPENWEATHERMAP_API_KEY` to `.env.example` for real adapter activation.
