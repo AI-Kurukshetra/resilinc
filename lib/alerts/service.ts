@@ -17,11 +17,11 @@ interface AlertRow {
   status: AlertStatus;
   acknowledged_by: string | null;
   acknowledged_at: string | null;
-  owner_id: string | null;
-  owner_assigned_at: string | null;
-  resolved_by: string | null;
-  resolved_at: string | null;
-  resolution_note: string | null;
+  owner_id?: string | null;
+  owner_assigned_at?: string | null;
+  resolved_by?: string | null;
+  resolved_at?: string | null;
+  resolution_note?: string | null;
   created_at: string;
 }
 
@@ -110,11 +110,11 @@ function toAlertDto(row: AlertRow): AlertDTO {
     createdAt: row.created_at,
     id: row.id,
     organizationId: row.organization_id,
-    ownerAssignedAt: row.owner_assigned_at,
-    ownerId: row.owner_id,
-    resolutionNote: row.resolution_note,
-    resolvedAt: row.resolved_at,
-    resolvedBy: row.resolved_by,
+    ownerAssignedAt: row.owner_assigned_at ?? null,
+    ownerId: row.owner_id ?? null,
+    resolutionNote: row.resolution_note ?? null,
+    resolvedAt: row.resolved_at ?? null,
+    resolvedBy: row.resolved_by ?? null,
     riskEventId: row.risk_event_id,
     severity: row.severity,
     status: row.status,
@@ -136,7 +136,27 @@ function toTimelineEventDto(row: AlertEventRow): AlertTimelineEventDTO {
 }
 
 const ALERT_SELECT =
-  "id, organization_id, supplier_id, risk_event_id, title, severity, status, acknowledged_by, acknowledged_at, owner_id, owner_assigned_at, resolved_by, resolved_at, resolution_note, created_at";
+  "id, organization_id, supplier_id, risk_event_id, title, severity, status, acknowledged_by, acknowledged_at, created_at";
+
+function isMissingAlertColumnError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) {
+    return false;
+  }
+
+  if (error.code === "42703") {
+    return typeof error.message === "string" && error.message.includes("alerts.");
+  }
+
+  if (error.code === "PGRST204") {
+    return (
+      typeof error.message === "string" &&
+      error.message.includes("column") &&
+      error.message.includes("'alerts'")
+    );
+  }
+
+  return false;
+}
 
 async function writeAlertEvent(
   supabase: SupabaseClient,
@@ -161,6 +181,19 @@ async function writeAlertEvent(
     .single();
 
   if (error || !data) {
+    // Backward compatibility: older DB snapshots may not include alert_events yet.
+    if (error?.code === "42P01") {
+      return {
+        actorId: input.actorUserId,
+        alertId: input.alertId,
+        createdAt: new Date().toISOString(),
+        eventType: input.eventType,
+        id: "alert-events-unavailable",
+        organizationId: input.organizationId,
+        payload: input.payload,
+      };
+    }
+
     throw new AlertServiceError(
       "ALERT_EVENT_WRITE_FAILED",
       error?.message || "Failed to append alert timeline event.",
@@ -530,6 +563,10 @@ export async function assignAlertOwner(
     .single();
 
   if (error || !data) {
+    if (isMissingAlertColumnError(error)) {
+      return existing;
+    }
+
     throw new AlertServiceError(
       "ALERT_ASSIGN_FAILED",
       error?.message || "Failed to assign alert owner.",
@@ -631,7 +668,7 @@ export async function resolveAlert(
 
   const resolvedAt = new Date().toISOString();
 
-  const updatePayload: {
+  const lifecycleUpdatePayload: {
     resolution_note: string | null;
     resolved_at: string;
     resolved_by: string | null;
@@ -645,13 +682,45 @@ export async function resolveAlert(
 
   const { data, error } = await supabase
     .from("alerts")
-    .update(updatePayload)
+    .update(lifecycleUpdatePayload)
     .eq("organization_id", input.organizationId)
     .eq("id", input.alertId)
     .select(ALERT_SELECT)
     .single();
 
   if (error || !data) {
+    if (isMissingAlertColumnError(error)) {
+      const fallback = await supabase
+        .from("alerts")
+        .update({ status: "resolved" })
+        .eq("organization_id", input.organizationId)
+        .eq("id", input.alertId)
+        .select(ALERT_SELECT)
+        .single();
+
+      if (fallback.error || !fallback.data) {
+        throw new AlertServiceError(
+          "ALERT_RESOLVE_FAILED",
+          fallback.error?.message || "Failed to resolve alert.",
+          500,
+        );
+      }
+
+      await writeAlertEvent(supabase, {
+        actorUserId: input.actorUserId,
+        alertId: input.alertId,
+        eventType: "resolved",
+        organizationId: input.organizationId,
+        payload: {
+          previousStatus: existing.status,
+          resolutionNote: input.body.resolutionNote ?? null,
+          resolvedAt,
+        },
+      });
+
+      return toAlertDto(fallback.data as AlertRow);
+    }
+
     throw new AlertServiceError(
       "ALERT_RESOLVE_FAILED",
       error?.message || "Failed to resolve alert.",

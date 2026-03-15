@@ -33,7 +33,7 @@ interface AlertSnapshotRow {
   severity: number;
   status: "open" | "acknowledged" | "resolved";
   supplier_id: string | null;
-  owner_id: string | null;
+  owner_id?: string | null;
 }
 
 interface OrganizationMemberRow {
@@ -191,7 +191,7 @@ async function getAlertSnapshot(
 ): Promise<AlertSnapshotRow> {
   const { data, error } = await supabase
     .from("alerts")
-    .select("id, title, severity, status, supplier_id, owner_id")
+    .select("id, title, severity, status, supplier_id")
     .eq("organization_id", organizationId)
     .eq("id", alertId)
     .maybeSingle();

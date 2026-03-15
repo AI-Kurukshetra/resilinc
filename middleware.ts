@@ -16,6 +16,7 @@ export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isAuthenticated = Boolean(user);
   const isApiRoute = pathname.startsWith("/api");
+  const isPublicLandingPage = pathname === "/";
   const isGuestAuthPage =
     pathname === "/login" || pathname === "/signup" || pathname === "/reset-password";
   const isNeutralAuthPage =
@@ -25,19 +26,11 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (pathname === "/") {
-    return redirectWithSessionCookies(
-      request,
-      isAuthenticated ? DEFAULT_AUTHENTICATED_REDIRECT : DEFAULT_UNAUTHENTICATED_REDIRECT,
-      response,
-    );
-  }
-
   if (isAuthenticated && isGuestAuthPage) {
     return redirectWithSessionCookies(request, DEFAULT_AUTHENTICATED_REDIRECT, response);
   }
 
-  if (!isAuthenticated && !isGuestAuthPage && !isNeutralAuthPage) {
+  if (!isAuthenticated && !isPublicLandingPage && !isGuestAuthPage && !isNeutralAuthPage) {
     const nextPath = `${pathname}${search}`;
     return redirectWithSessionCookies(
       request,

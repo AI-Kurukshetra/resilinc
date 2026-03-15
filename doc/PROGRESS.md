@@ -68,3 +68,31 @@
   Checks passed: ./scripts/preflight.sh ✓
   Next handoff to: $frontend-design — implement M5 supplier/alert/incident UI against new APIs.
 [2026-03-14 18:13] coordinator — Completed M4.S1/M4.S2/M4.S3 backend implementation (scoring -> alerts -> incidents), validated with preflight.
+[2026-03-14 18:22] $frontend-design — Completed M5.S2 supplier/alert views with evidence + acknowledgement interactions.
+  Output files:
+    + app/(dashboard)/suppliers/page.tsx
+    + app/(dashboard)/suppliers/[supplierId]/page.tsx
+    + app/(dashboard)/alerts/page.tsx
+    + app/(dashboard)/alerts/[alertId]/page.tsx
+    + app/(dashboard)/alerts/_components/alert-actions.tsx
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓
+  Next handoff to: $frontend-design — implement M5.S3 incident board, action checklist editor, and report summary/export view.
+
+[2026-03-14 18:22] $frontend-design — Completed M5.S3 incident board, action checklist editor, and demo report summary/export views.
+  Output files:
+    + app/(dashboard)/incidents/page.tsx
+    + app/(dashboard)/incidents/[incidentId]/page.tsx
+    + app/(dashboard)/incidents/_components/incident-action-editor.tsx
+    + app/(dashboard)/reports/page.tsx
+    + app/(dashboard)/reports/_components/report-export-actions.tsx
+    + app/(dashboard)/_components/dashboard-nav.tsx
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓
+  Next handoff to: $agent-browser — validate supplier -> alert -> incident -> report workflows in E2E.
+
+[2026-03-14 18:22] coordinator — Completed M5.S2 and M5.S3 UI implementation with dashboard navigation, loading/error states, and API-backed interactions.
+[2026-03-14 18:52] coordinator — Delivered Mac-style dashboard redesign, added `/risk-events` ingestion/monitoring workspace, added supplier creation form, and revalidated with lint/typecheck/test/build (Playwright execution deferred by user request).
+[2026-03-14 18:57] coordinator — Disabled `AUTH_BYPASS_ENABLED` in local env, changed middleware to allow public `/` access, replaced root redirect with a proper landing page, and revalidated with lint/typecheck/test/build.
+[2026-03-14 19:03] coordinator — Added interactive alert operations workbench (search/filter + generate alerts + create incidents), replacing static-only alert list UX; revalidated with lint/typecheck/test/build.
+[2026-03-14 19:07] coordinator — Added signup confirmation improvements: pass host-aware `emailRedirectTo` on signup and shipped resend-confirmation API + login/signup UI form; revalidated with lint/typecheck/test/build.
+[2026-03-14 19:12] coordinator — Resolved nested-form hydration bug on signup and added `AUTH_DEV_AUTO_CONFIRM_SIGNUP` localhost fallback path in signup API for dev environments where confirmation emails are not delivered.
+[2026-03-14 19:17] coordinator — Fixed signup workspace bootstrap RLS failure by adding a service-role fallback in dashboard org bootstrap for authenticated users when `organizations`/membership inserts are denied by row-level security; revalidated with `pnpm lint`, `pnpm typecheck`, and `pnpm test`.

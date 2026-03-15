@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   title: "Reset Password | Resilinc Lite",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ResetPasswordPage() {
   const supabase = await createServerSupabaseClient();
   const {

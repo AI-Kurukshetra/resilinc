@@ -2,9 +2,13 @@ import type { PostgrestError, SupabaseClient, User } from "@supabase/supabase-js
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { DashboardErrorState } from "@/app/(dashboard)/_components/dashboard-error-state";
+import { DashboardNav } from "@/app/(dashboard)/_components/dashboard-nav";
 import { DashboardUnauthorizedState } from "@/app/(dashboard)/_components/dashboard-unauthorized-state";
 import { isAuthBypassEnabled } from "@/lib/auth/feature-flags";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  createServerSupabaseClient,
+  createServiceRoleSupabaseClient,
+} from "@/lib/supabase/server";
 
 interface BootstrapResult {
   ok: boolean;
@@ -19,7 +23,12 @@ interface MembershipBootstrapResult {
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   if (isAuthBypassEnabled()) {
-    return <section>{children}</section>;
+    return (
+      <div className="min-h-screen">
+        <DashboardNav />
+        <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:py-8">{children}</section>
+      </div>
+    );
   }
 
   const supabase = await createServerSupabaseClient();
@@ -64,7 +73,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     return <DashboardUnauthorizedState />;
   }
 
-  return <section>{children}</section>;
+  return (
+    <div className="min-h-screen">
+      <DashboardNav />
+      <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:py-8">{children}</section>
+    </div>
+  );
 }
 
 async function ensureProfileBootstrap(supabase: SupabaseClient, user: User): Promise<BootstrapResult> {
@@ -136,6 +150,22 @@ async function ensureOrganizationMembershipBootstrap(
     .single();
 
   if (organizationError || !organization?.id) {
+    if (shouldTryPrivilegedBootstrap(organizationError)) {
+      const fallbackResult = await bootstrapWorkspaceWithServiceRole(user);
+      if (fallbackResult.organizationId) {
+        return {
+          ok: true,
+          organizationId: fallbackResult.organizationId,
+        };
+      }
+
+      return {
+        ok: false,
+        errorMessage:
+          organizationError?.message || fallbackResult.errorMessage || "Failed to create organization.",
+      };
+    }
+
     return {
       ok: false,
       errorMessage: organizationError?.message || "Failed to create organization.",
@@ -149,6 +179,21 @@ async function ensureOrganizationMembershipBootstrap(
   });
 
   if (ownerMembershipError && !isUniqueViolation(ownerMembershipError)) {
+    if (shouldTryPrivilegedBootstrap(ownerMembershipError)) {
+      const fallbackResult = await bootstrapWorkspaceWithServiceRole(user);
+      if (fallbackResult.organizationId) {
+        return {
+          ok: true,
+          organizationId: fallbackResult.organizationId,
+        };
+      }
+
+      return {
+        ok: false,
+        errorMessage: ownerMembershipError.message || fallbackResult.errorMessage,
+      };
+    }
+
     return {
       ok: false,
       errorMessage: ownerMembershipError.message,
@@ -218,4 +263,123 @@ function readEmailHandle(email: string | undefined): string | null {
 
 function isUniqueViolation(error: PostgrestError): boolean {
   return error.code === "23505";
+}
+
+function shouldTryPrivilegedBootstrap(error: PostgrestError | null | undefined): boolean {
+  if (!error) {
+    return false;
+  }
+
+  const normalizedMessage = error.message.toLowerCase();
+
+  return (
+    error.code === "42501" ||
+    normalizedMessage.includes("row-level security") ||
+    normalizedMessage.includes("permission denied")
+  );
+}
+
+async function bootstrapWorkspaceWithServiceRole(
+  user: User,
+): Promise<{ organizationId?: string; errorMessage?: string }> {
+  try {
+    const adminSupabase = createServiceRoleSupabaseClient();
+
+    const { data: existingMembership, error: existingMembershipError } = await adminSupabase
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingMembershipError) {
+      return {
+        errorMessage: existingMembershipError.message,
+      };
+    }
+
+    if (existingMembership?.organization_id) {
+      return {
+        organizationId: existingMembership.organization_id,
+      };
+    }
+
+    const { error: profileUpsertError } = await adminSupabase.from("profiles").upsert(
+      {
+        user_id: user.id,
+        full_name: readUserDisplayName(user),
+      },
+      { onConflict: "user_id" },
+    );
+
+    if (profileUpsertError) {
+      return {
+        errorMessage: profileUpsertError.message,
+      };
+    }
+
+    const { data: existingOrganization, error: existingOrganizationError } = await adminSupabase
+      .from("organizations")
+      .select("id")
+      .eq("created_by", user.id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingOrganizationError) {
+      return {
+        errorMessage: existingOrganizationError.message,
+      };
+    }
+
+    let organizationId = existingOrganization?.id;
+
+    if (!organizationId) {
+      const { data: createdOrganization, error: createOrganizationError } = await adminSupabase
+        .from("organizations")
+        .insert({
+          created_by: user.id,
+          name: buildPersonalOrganizationName(user),
+        })
+        .select("id")
+        .single();
+
+      if (createOrganizationError || !createdOrganization?.id) {
+        return {
+          errorMessage: createOrganizationError?.message || "Failed to create organization.",
+        };
+      }
+
+      organizationId = createdOrganization.id;
+    }
+
+    const { error: ownerMembershipError } = await adminSupabase
+      .from("organization_members")
+      .upsert(
+        {
+          organization_id: organizationId,
+          role: "owner",
+          user_id: user.id,
+        },
+        { onConflict: "organization_id,user_id" },
+      );
+
+    if (ownerMembershipError) {
+      return {
+        errorMessage: ownerMembershipError.message,
+      };
+    }
+
+    return {
+      organizationId,
+    };
+  } catch (error) {
+    return {
+      errorMessage:
+        error instanceof Error
+          ? error.message
+          : "Workspace bootstrap fallback failed unexpectedly.",
+    };
+  }
 }

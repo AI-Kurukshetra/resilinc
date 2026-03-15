@@ -85,3 +85,63 @@
 - Added post-ingestion M4 orchestration `lib/risk-events/workflow.ts` and integrated workflow execution into `POST /api/risk-events` and `POST /api/risk-events/[eventId]/enrich` so scoring -> alerts -> incident automation runs automatically with non-blocking warning summaries.
 - Updated API org context (`lib/api/org-context.ts`) to expose `actorUserId` for timeline/ownership attribution, including bypass-mode actor resolution.
 - Added M4 unit coverage: `lib/risk-scoring/engine.test.ts`, `lib/alerts/service.test.ts`, and `lib/incidents/service.test.ts`.
+- Added dashboard navigation shell (`app/(dashboard)/_components/dashboard-nav.tsx`) and wrapped protected routes in a shared dashboard chrome via `app/(dashboard)/layout.tsx`.
+- Implemented M5.S2 supplier UI flows:
+  - `app/(dashboard)/suppliers/page.tsx` supplier risk list with score/trend + active alert pressure.
+  - `app/(dashboard)/suppliers/[supplierId]/page.tsx` supplier detail with recent alerts and mapped risk-event source evidence.
+  - route loading/error states under `app/(dashboard)/suppliers/*`.
+- Implemented M5.S2 alert UI flows:
+  - `app/(dashboard)/alerts/page.tsx` alert feed with status/owner/supplier context.
+  - `app/(dashboard)/alerts/[alertId]/page.tsx` alert detail evidence/timeline view.
+  - `app/(dashboard)/alerts/_components/alert-actions.tsx` client interactions for assign, acknowledge, and resolve via alert APIs.
+  - route loading/error states under `app/(dashboard)/alerts/*`.
+- Implemented M5.S3 incident UI flows:
+  - `app/(dashboard)/incidents/page.tsx` Kanban-style incident board (`open`, `in_progress`, `closed`).
+  - `app/(dashboard)/incidents/[incidentId]/page.tsx` incident detail with linked alert context.
+  - `app/(dashboard)/incidents/_components/incident-action-editor.tsx` checklist editor wired to action-status and close endpoints.
+  - route loading/error states under `app/(dashboard)/incidents/*`.
+- Implemented M5.S3 report summary/export view:
+  - `app/(dashboard)/reports/page.tsx` KPI snapshot + top supplier risk + recent incidents + export preview.
+  - `app/(dashboard)/reports/_components/report-export-actions.tsx` TXT download and print actions for demo export.
+  - route loading/error states under `app/(dashboard)/reports/*`.
+- Added shared route-level error helper `app/(dashboard)/_components/route-error.tsx` and supplier trend presenter `app/(dashboard)/suppliers/_components/supplier-risk-trend.tsx`.
+- Fixed production build blocker on `/reset-password` by forcing dynamic rendering in `app/(auth)/reset-password/page.tsx`.
+- Completed M5.S1 overview UX: added disruption feed with severity filters and added route-level loading/error states for overview.
+- Added Playwright infrastructure (`playwright.config.ts`) and core E2E specs in `tests/e2e/core-journeys.spec.ts` (execution currently deferred per user request).
+- Added `lib/validations/risk-events.test.ts` and tightened `vitest.config.ts` include/exclude rules to prevent dependency test suites from being executed.
+- Hardened alert/incident services for schema-drift compatibility:
+  - `lib/alerts/service.ts` now gracefully handles missing M4 alert columns (`owner_*`, `resolved_*`, `resolution_note`) and missing `alert_events` table.
+  - `lib/incidents/service.ts` no longer requires `alerts.owner_id` for alert snapshot reads.
+  - Alert UI queries in `app/(dashboard)/alerts/page.tsx` and `app/(dashboard)/alerts/[alertId]/page.tsx` now avoid selecting optional M4 columns directly.
+- Redesigned dashboard UI with Mac-style visual system:
+  - Added glassmorphism theme tokens/utilities in `app/globals.css`.
+  - Updated dashboard shell styling in `app/(dashboard)/layout.tsx` and modernized navigation in `app/(dashboard)/_components/dashboard-nav.tsx`.
+  - Applied visual refresh to key routes (`overview`, `suppliers`, `alerts`, `incidents`, `reports`).
+- Added backend-wired Risk Events workspace:
+  - New page `app/(dashboard)/risk-events/page.tsx` with severity filtering and event feed.
+  - New client intake form `app/(dashboard)/risk-events/_components/risk-event-intake-form.tsx` posting to `POST /api/risk-events`.
+  - Added route loading/error states for `/risk-events`.
+- Added supplier creation UX aligned to backend CRUD:
+  - New client form `app/(dashboard)/suppliers/_components/supplier-create-form.tsx` posting to `POST /api/suppliers`.
+  - Integrated creation panel into `app/(dashboard)/suppliers/page.tsx`.
+- Disabled local bypass mode by setting `AUTH_BYPASS_ENABLED=false` in `.env` to restore login/signup authentication flow.
+- Replaced root redirect behavior with a public landing page in `app/page.tsx` (server-aware CTA to `/login`/`/signup` or `/overview` for signed-in users).
+- Updated auth middleware guards in `middleware.ts` so `/` is treated as a public landing route while protected routes still require authentication.
+- Added interactive alert operations UI in `app/(dashboard)/alerts/_components/alerts-workbench.tsx` and integrated it into `app/(dashboard)/alerts/page.tsx`:
+  - client-side live search/filter (status + min severity),
+  - `Generate From Scores` action (calls `POST /api/alerts/generate`),
+  - `Create Incident` row action (calls `POST /api/incidents/from-alert`),
+  - inline feedback/error handling with route refresh.
+- Improved signup confirmation workflow:
+  - Updated `POST /api/auth/signup` to pass host-aware `emailRedirectTo` (`/auth/callback?next=/overview`) to Supabase.
+  - Added `POST /api/auth/resend-confirmation` endpoint with validation and normalized auth/rate-limit error handling.
+  - Added reusable UI `app/(auth)/_components/resend-confirmation-form.tsx`.
+  - Integrated resend confirmation form into `app/(auth)/login/page.tsx` (shown on `checkEmail=1`) with email prefilled from signup redirect.
+  - Updated signup redirect to include email query (`/login?checkEmail=1&email=...`) for resend usability.
+- Fixed signup hydration issue by removing nested form usage in `app/(auth)/_components/signup-form.tsx` (resend confirmation form is now shown from login flow only).
+- Added optional localhost dev fallback in `POST /api/auth/signup`:
+  - `AUTH_DEV_AUTO_CONFIRM_SIGNUP=true` (non-production + localhost only) auto-confirms new signup via service-role admin API and signs in immediately.
+  - Added flag to `.env.example`; enabled in local `.env` for this workspace.
+- Fixed first-login workspace bootstrap reliability in `app/(dashboard)/layout.tsx`:
+  - when authenticated-user inserts into `organizations`/`organization_members` fail with RLS/permission errors, bootstrap now retries via a guarded service-role fallback tied to the verified `user.id`,
+  - fallback path is idempotent (reuses existing membership/org if present, upserts profile + owner membership) and returns a resolved `organizationId` so signup can proceed into the dashboard.

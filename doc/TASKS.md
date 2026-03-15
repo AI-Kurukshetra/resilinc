@@ -20,6 +20,12 @@
 - [x] (2026-03-14 17:13) Force demo actor context for bypass mode: all API org access resolves as `Akash Bhavsar` when `AUTH_BYPASS_ENABLED=true`.
 - [x] (2026-03-14 17:18) Replace overview placeholder with live data dashboard cards/lists (suppliers, facilities, parts, alerts/incidents) for bypass-mode demo usability.
 - [x] (2026-03-14 17:29) Configure local `SUPABASE_SERVICE_ROLE_KEY`, create demo auth user, apply remote M2 hardening migration, and seed remote demo data for populated overview.
+- [x] (2026-03-14 18:52) Redesign dashboard with Mac-style UI system, add backend-wired Risk Events workspace, and add supplier creation UX in frontend.
+- [x] (2026-03-14 18:57) Turn off auth bypass mode and replace `/` redirect with a public landing page that routes users to login/signup or dashboard.
+- [x] (2026-03-14 19:03) Add meaningful alert operations interactivity (live filters/search, generate alerts from scores, create incident from alert) to avoid static-only dashboard usage.
+- [x] (2026-03-14 19:07) Fix signup confirmation reliability: add `emailRedirectTo` on signup and add resend-confirmation API/UI flow for local/hosted environments.
+- [x] (2026-03-14 19:12) Fix signup hydration error by removing nested forms and add localhost-only auto-confirm fallback option for dev when confirmation mail is unavailable.
+- [x] (2026-03-14 19:17) Fix signup workspace bootstrap RLS failure by adding authenticated-user fallback provisioning with service-role recovery in dashboard layout.
 
 ## E2E Blueprint Execution Plan (Track by ID)
 Reference: `doc/blueprint/E2E_DEVELOPMENT_PLAN.md`
@@ -81,32 +87,32 @@ Reference: `doc/blueprint/E2E_DEVELOPMENT_PLAN.md`
 - [x] (2026-03-14 18:13) M4.S3.c Action transitions and closure
 
 ### M5 Dashboard and Workflow UI
-- [ ] M5.S1 Overview dashboard
-- [ ] M5.S1.a KPI cards
-- [ ] M5.S1.b Disruption feed + filters
-- [ ] M5.S1.c Skeleton/loading/error states
-- [ ] M5.S2 Supplier and alert detail screens
-- [ ] M5.S2.a Supplier risk list/detail
-- [ ] M5.S2.b Alert detail evidence view
-- [ ] M5.S2.c Acknowledgment actions
-- [ ] M5.S3 Incident board and report views
-- [ ] M5.S3.a Incident board
-- [ ] M5.S3.b Action checklist editor
-- [ ] M5.S3.c Report summary page
+- [x] (2026-03-14 18:47) M5.S1 Overview dashboard
+- [x] (2026-03-14 18:47) M5.S1.a KPI cards
+- [x] (2026-03-14 18:47) M5.S1.b Disruption feed + filters
+- [x] (2026-03-14 18:47) M5.S1.c Skeleton/loading/error states
+- [x] (2026-03-14 18:22) M5.S2 Supplier and alert detail screens
+- [x] (2026-03-14 18:22) M5.S2.a Supplier risk list/detail
+- [x] (2026-03-14 18:22) M5.S2.b Alert detail evidence view
+- [x] (2026-03-14 18:22) M5.S2.c Acknowledgment actions
+- [x] (2026-03-14 18:22) M5.S3 Incident board and report views
+- [x] (2026-03-14 18:22) M5.S3.a Incident board
+- [x] (2026-03-14 18:22) M5.S3.b Action checklist editor
+- [x] (2026-03-14 18:22) M5.S3.c Report summary page
 
 ### M6 Testing and Quality Gates
-- [ ] M6.S1 Unit tests for validation/business logic
-- [ ] M6.S1.a Validation/scoring tests
+- [~] (2026-03-14 18:47) M6.S1 Unit tests for validation/business logic
+- [x] (2026-03-14 18:47) M6.S1.a Validation/scoring tests
 - [ ] M6.S1.b API handler tests
-- [ ] M6.S1.c Incident transition tests
-- [ ] M6.S2 E2E tests for critical journeys
+- [x] (2026-03-14 18:47) M6.S1.c Incident transition tests
+- [~] (2026-03-14 18:47) M6.S2 E2E tests for critical journeys (specs added; execution deferred per user request)
 - [ ] M6.S2.a Auth journey
-- [ ] M6.S2.b Ingestion -> alert journey
-- [ ] M6.S2.c Alert -> incident closure journey
-- [ ] M6.S3 Preflight + CI checklist
-- [ ] M6.S3.a Run preflight
-- [ ] M6.S3.b Run lint/typecheck/test/e2e
-- [ ] M6.S3.c Log residual risks
+- [~] (2026-03-14 18:47) M6.S2.b Ingestion -> alert journey
+- [~] (2026-03-14 18:47) M6.S2.c Alert -> incident closure journey
+- [~] (2026-03-14 18:47) M6.S3 Preflight + CI checklist
+- [x] (2026-03-14 18:47) M6.S3.a Run preflight
+- [~] (2026-03-14 18:47) M6.S3.b Run lint/typecheck/test/e2e (non-E2E gates passed; Playwright execution deferred)
+- [x] (2026-03-14 18:47) M6.S3.c Log residual risks
 
 ### M7 Deployment, Demo, and Submission Pack
 - [~] (2026-03-14 15:42) M7.S1 Vercel deployment setup (production live, GitHub auto-deploy blocked on missing Vercel GitHub login connection)

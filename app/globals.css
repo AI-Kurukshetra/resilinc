@@ -4,9 +4,46 @@
 
 :root {
   color-scheme: light;
+  --mac-bg: #f2f4f8;
+  --mac-panel: rgba(255, 255, 255, 0.74);
+  --mac-panel-border: rgba(148, 163, 184, 0.28);
+  --mac-text: #0f172a;
+  --mac-muted: #475569;
+  --mac-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  --mac-blur: saturate(140%) blur(14px);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  font-family:
+    "SF Pro Text",
+    "SF Pro Display",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.22), transparent 38%),
+    radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.18), transparent 30%),
+    linear-gradient(180deg, #f8fafc 0%, var(--mac-bg) 100%);
+  color: var(--mac-text);
+}
+
+.mac-surface {
+  border: 1px solid var(--mac-panel-border);
+  background: var(--mac-panel);
+  backdrop-filter: var(--mac-blur);
+  box-shadow: var(--mac-shadow);
+}
+
+.mac-pill {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  color: var(--mac-muted);
+}
+
+.mac-muted {
+  color: var(--mac-muted);
 }

@@ -128,3 +128,39 @@ Rationale: Restricting automation to high-severity alerts avoids incident noise 
 
 ## 2026-03-14 — Enforce incident closure gate on both action completion and alert resolution
 Rationale: Requiring all actions `done` and parent alert `resolved` guarantees that incident closure reflects completed response work rather than status drift.
+
+## 2026-03-14 — Keep M5 supplier/alert/incident/report pages server-rendered with direct Supabase reads
+Rationale: Dashboard routes are authenticated and org-scoped already; using RSC queries minimizes client state complexity while preserving fresh data on each navigation.
+
+## 2026-03-14 — Use API endpoints for alert/incident mutations from client components
+Rationale: Reusing M4 API contracts (`/api/alerts/*`, `/api/incidents/*`) keeps mutation logic centralized (validation + authorization + transition rules) and avoids duplicating business rules in UI server actions.
+
+## 2026-03-14 — Adopt a Mac-style dashboard visual system for core operator routes
+Rationale: The previous UI was functionally correct but not enterprise-grade in perceived polish. A consistent glass-panel shell, Apple-style typography stack, and stronger hierarchy improves readability and executive-demo quality without changing backend contracts.
+
+## 2026-03-14 — Expose risk ingestion as a first-class dashboard workflow
+Rationale: Core backend capabilities (`POST /api/risk-events`, ingestion workflow orchestration) were not directly actionable from UI. Adding a dedicated `/risk-events` workspace closes the user journey from detection intake to downstream alert/incident flows.
+
+## 2026-03-14 — Tolerate schema drift for alerts lifecycle columns and timeline table
+Rationale: Some environments run without the latest M4 migration applied. Alert service fallbacks for missing `owner_*` / `resolved_*` columns and missing `alert_events` table keep core alert acknowledge/resolve workflows operational while migration alignment is pending.
+
+## 2026-03-14 — Constrain Vitest file discovery to project-owned unit tests
+Rationale: Default globbing executed third-party dependency test suites under `node_modules`, causing slow and unstable runs. Explicit include/exclude patterns restore deterministic, fast CI-oriented unit gates.
+
+## 2026-03-14 — Keep `/` as a public landing page, not an automatic auth redirect
+Rationale: Product-first entry experience should explain capability and direct users to login/signup intentionally; auto-redirecting from root degraded UX and made the app feel incomplete.
+
+## 2026-03-14 — Disable auth bypass for normal product usage
+Rationale: Bypass mode was useful for rapid demo development, but enterprise-ready behavior requires explicit authentication and protected-route enforcement by default.
+
+## 2026-03-14 — Convert alerts page into an action-oriented workbench
+Rationale: A read-only table made the product feel static despite backend capabilities. Co-locating filter/search with generation and incident creation actions gives operators immediate, meaningful workflows from a single screen.
+
+## 2026-03-14 — Make signup confirmation links host-aware and expose resend action in UI
+Rationale: In local/preview environments, relying on default auth redirect targets can misroute confirmation links. Explicit `emailRedirectTo` plus a first-class resend confirmation flow improves signup reliability and reduces user drop-off when emails are delayed or throttled.
+
+## 2026-03-14 — Add localhost-only dev auto-confirm fallback for signup
+Rationale: Some local/dev environments cannot reliably deliver confirmation emails due provider throttling or auth email setup. A strictly gated fallback (`AUTH_DEV_AUTO_CONFIRM_SIGNUP` + localhost + non-production) preserves production security while unblocking developer onboarding.
+
+## 2026-03-14 — Add guarded service-role fallback for first-login workspace bootstrap
+Rationale: Some environments intermittently lose user JWT context during initial dashboard bootstrap, causing RLS denials on `organizations`/`organization_members` inserts despite successful authentication. Retrying bootstrap with service-role only after verified `auth.getUser()` preserves signup continuity while keeping scope constrained to the current authenticated user.

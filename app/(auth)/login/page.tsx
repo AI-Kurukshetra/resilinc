@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthLink, AuthPageShell } from "@/app/(auth)/_components/auth-page-shell";
 import { LoginForm } from "@/app/(auth)/_components/login-form";
+import { ResendConfirmationForm } from "@/app/(auth)/_components/resend-confirmation-form";
 import { sanitizeNextPath } from "@/lib/auth/redirects";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -13,6 +14,7 @@ interface LoginPageProps {
   searchParams?: Promise<{
     next?: string | string[];
     checkEmail?: string | string[];
+    email?: string | string[];
     passwordReset?: string | string[];
   }>;
 }
@@ -30,6 +32,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const nextPath = sanitizeNextPath(readSingleParam(params?.next), "/overview");
   const showCheckEmailNotice = readSingleParam(params?.checkEmail) === "1";
+  const checkEmailAddress = readSingleParam(params?.email);
   const showPasswordResetNotice = readSingleParam(params?.passwordReset) === "1";
 
   return (
@@ -45,9 +48,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       }
     >
       {showCheckEmailNotice ? (
-        <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-          Check your inbox to confirm your account, then sign in.
-        </p>
+        <>
+          <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            Check your inbox to confirm your account, then sign in.
+          </p>
+          <ResendConfirmationForm defaultEmail={checkEmailAddress} />
+        </>
       ) : null}
       {showPasswordResetNotice ? (
         <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
