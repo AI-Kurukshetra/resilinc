@@ -61,6 +61,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </p>
       ) : null}
       <LoginForm nextPath={nextPath} />
+      <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+        <p className="font-medium">Demo credentials (seeded data):</p>
+        <p>
+          Email: <span className="font-mono">secir92769@niprack.com</span>
+        </p>
+        <p>
+          Password: <span className="font-mono">Temp@1234</span>
+        </p>
+      </div>
     </AuthPageShell>
   );
 }
