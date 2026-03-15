@@ -94,6 +94,9 @@ Added in `20260314183000_m4_risk_alert_incident_workflows.sql`:
 - `resolution_note`
 
 ## Seed Strategy (M2.S1.b)
+
+> **Full seeding guide for future agents: [`doc/SEEDING.md`](SEEDING.md)**
+
 File: `supabase/seed.sql`
 
 Behavior:
@@ -302,4 +305,29 @@ File: `supabase/seed_phase2.sql`
 Behavior:
 - Requires Phase 1 `supabase/seed.sql` to be applied first.
 - Resolves existing org/suppliers/parts/facilities by name.
+- Fully idempotent — safe to re-run (uses `ON CONFLICT`, `IF NOT EXISTS` guards, and `DELETE`+re-insert for children).
 - Seeds: 4 part financial profiles, 2 mitigation plans with 3 actions each, 2 compliance frameworks with 3 items each, ESG scores for 5 suppliers, financial health for 5 suppliers, geopolitical profiles for 5 regions, 15 performance records (3 per supplier), 6 inventory levels, 3 integrations, 3 transportation routes, 5 notifications.
+
+## Phase 3 Seed Data — Risk Pipeline
+File: `supabase/seed_phase3.sql`
+
+Behavior:
+- Requires Phase 1 + Phase 2 seeds to be applied first.
+- Resolves org, user, and suppliers by name.
+- Seeds the complete risk-response pipeline for demo purposes:
+  - **25 risk events** across 6 categories (geopolitical, cyber, natural disaster, supply disruption, quality, regulatory) spread over 90 days
+  - **27 risk-event-supplier links** mapping events to affected suppliers with impact levels 1-5
+  - **5 supplier risk scores** (MicroCore 78.5↑, Pacific 52.3→, Nordic 35.0↓, Sierra 68.75↑, Atlas 45.2→)
+  - **20 alerts**: 7 open, 6 acknowledged, 7 resolved (severity S1-S5 distribution)
+  - **43 alert events**: audit trail with generated, escalated, acknowledged, resolved workflow events
+  - **10 incidents**: 3 open, 4 in-progress, 3 closed — with owner assignments and closure timestamps
+  - **35 incident actions**: per-incident action checklists with todo/doing/done/blocked statuses
+
+## User Linking
+File: `supabase/link_user_to_seed_org.sql`
+
+Behavior:
+- Connects a real authenticated user to the seeded "Apex Devices Group" organization.
+- Removes the user's auto-created personal org.
+- Must be run AFTER all seed phases.
+- Update the target email in the script before running.

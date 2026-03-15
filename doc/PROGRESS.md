@@ -234,3 +234,13 @@
     + supabase/seed_phase2.sql (consolidated Phase 2 seed: financial profiles, mitigation plans+actions, compliance frameworks+items, ESG scores, financial health, geopolitical profiles, performance records, inventory levels, integrations, transportation routes, notifications)
     ~ app/(dashboard)/_components/dashboard-nav.tsx (grouped navigation: Monitor/Respond/Manage + notification bell)
   Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓  scripts/preflight.sh ✓
+
+[2026-03-15 23:30] coordinator — Phase 3 Seed Data and Seeding Documentation:
+  + supabase/seed_phase3.sql (25 risk events, 27 risk-event-supplier links, 5 supplier risk scores, 20 alerts, 43 alert events, 10 incidents, 35 incident actions)
+  ~ supabase/seed_phase2.sql (fixed idempotency: ON CONFLICT for compliance_frameworks, IF NOT EXISTS guards for mitigation_plans, performance_records, transportation_routes, notifications)
+  + doc/SEEDING.md (comprehensive seeding guide: architecture, conventions, data standards, agent checklist)
+  ~ doc/SCHEMA.md (added Phase 3 seed summary, user linking docs, SEEDING.md link)
+  ~ doc/DECISIONS.md (added phased seed architecture and idempotency decisions)
+  ~ doc/CHANGELOG.md (added Phase 3 seed entry)
+  ~ suffix_prompt.md (added SEEDING.md to mandatory read order)
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓

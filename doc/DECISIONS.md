@@ -197,3 +197,9 @@ Rationale: Weather scans run across multiple facilities that may share the same 
 
 ## 2026-03-15 — Organize dashboard nav into Monitor/Respond/Manage groups
 Rationale: With 12+ nav items, a flat list degrades scanability; semantic grouping (Monitor for observability, Respond for action, Manage for configuration) reduces cognitive load and aligns with operational workflow stages.
+
+## 2026-03-15 — Phased seed architecture with dedicated seeding guide
+Rationale: Seed data is split into ordered phases (Phase 1 core → Phase 2 extended → Phase 3 risk pipeline → user linking) to allow incremental application and independent development. A dedicated `doc/SEEDING.md` guide documents conventions (idempotency, entity resolution by name, PL/pgSQL block structure, realistic narrative consistency) so that future agents adding new features automatically know how and where to add seed data. This prevents the recurring problem of new tables being created without demo data, leaving dashboard pages empty.
+
+## 2026-03-15 — Idempotent seed files using guards and ON CONFLICT
+Rationale: Seed files must be re-runnable without duplicate key errors. Tables with unique constraints use `ON CONFLICT ... DO UPDATE`; tables without unique constraints use `IF NOT EXISTS (SELECT ...)` guards or `SELECT INTO` + null checks. Parent-child relationships use guard-on-parent with nested child inserts. This was retrofitted into `seed_phase2.sql` after a `compliance_frameworks` duplicate key failure during re-seeding.

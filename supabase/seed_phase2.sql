@@ -68,32 +68,41 @@ begin
         annual_volume = excluded.annual_volume,
         lead_time_days = excluded.lead_time_days;
 
-  -- M9.S1: Mitigation plans (2 plans, 3 actions each)
-  insert into public.mitigation_plans (organization_id, supplier_id, title, description, strategy, status, priority, target_date)
-  values (demo_org, s_microcore, 'Taiwan Semiconductor Dual-Source Strategy', 'Establish secondary MCU source to reduce single-point-of-failure risk from TW geopolitical exposure.', 'mitigate', 'active', 5, now() + interval '90 days')
-  returning id into mp1;
+  -- M9.S1: Mitigation plans (2 plans, 3 actions each) — guard against duplicate runs
+  select id into mp1 from public.mitigation_plans where organization_id = demo_org and title = 'Taiwan Semiconductor Dual-Source Strategy';
+  if mp1 is null then
+    insert into public.mitigation_plans (organization_id, supplier_id, title, description, strategy, status, priority, target_date)
+    values (demo_org, s_microcore, 'Taiwan Semiconductor Dual-Source Strategy', 'Establish secondary MCU source to reduce single-point-of-failure risk from TW geopolitical exposure.', 'mitigate', 'active', 5, now() + interval '90 days')
+    returning id into mp1;
 
-  insert into public.mitigation_actions (plan_id, organization_id, title, status, notes)
-  values
-    (mp1, demo_org, 'Identify qualified alternate MCU supplier in KR/JP', 'completed', 'Shortlisted 3 candidates from KR'),
-    (mp1, demo_org, 'Complete qualification testing with top candidate', 'in_progress', 'Testing batch received 2026-03-10'),
-    (mp1, demo_org, 'Negotiate volume pricing and establish supply agreement', 'pending', null);
+    insert into public.mitigation_actions (plan_id, organization_id, title, status, notes)
+    values
+      (mp1, demo_org, 'Identify qualified alternate MCU supplier in KR/JP', 'completed', 'Shortlisted 3 candidates from KR'),
+      (mp1, demo_org, 'Complete qualification testing with top candidate', 'in_progress', 'Testing batch received 2026-03-10'),
+      (mp1, demo_org, 'Negotiate volume pricing and establish supply agreement', 'pending', null);
+  end if;
 
-  insert into public.mitigation_plans (organization_id, supplier_id, title, description, strategy, status, priority, target_date)
-  values (demo_org, s_nordic, 'Battery Cell Safety Stock Buffer', 'Increase safety stock from 2 weeks to 4 weeks to cover EU logistics disruptions.', 'accept', 'draft', 3, now() + interval '60 days')
-  returning id into mp2;
+  select id into mp2 from public.mitigation_plans where organization_id = demo_org and title = 'Battery Cell Safety Stock Buffer';
+  if mp2 is null then
+    insert into public.mitigation_plans (organization_id, supplier_id, title, description, strategy, status, priority, target_date)
+    values (demo_org, s_nordic, 'Battery Cell Safety Stock Buffer', 'Increase safety stock from 2 weeks to 4 weeks to cover EU logistics disruptions.', 'accept', 'draft', 3, now() + interval '60 days')
+    returning id into mp2;
 
-  insert into public.mitigation_actions (plan_id, organization_id, title, status, notes)
-  values
-    (mp2, demo_org, 'Calculate revised safety stock quantities', 'pending', null),
-    (mp2, demo_org, 'Secure warehouse capacity for additional inventory', 'pending', null),
-    (mp2, demo_org, 'Update reorder triggers in ERP system', 'pending', null);
+    insert into public.mitigation_actions (plan_id, organization_id, title, status, notes)
+    values
+      (mp2, demo_org, 'Calculate revised safety stock quantities', 'pending', null),
+      (mp2, demo_org, 'Secure warehouse capacity for additional inventory', 'pending', null),
+      (mp2, demo_org, 'Update reorder triggers in ERP system', 'pending', null);
+  end if;
 
   -- M9.S2: Compliance frameworks (2 frameworks, 6 items)
   insert into public.compliance_frameworks (organization_id, name, description, category)
   values (demo_org, 'ISO 28000 Supply Chain Security', 'International standard for supply chain security management systems.', 'industry')
+  on conflict (organization_id, name) do update set description = excluded.description
   returning id into cf1;
 
+  -- Delete old items to avoid duplicates, then re-insert
+  delete from public.compliance_items where framework_id = cf1 and organization_id = demo_org;
   insert into public.compliance_items (framework_id, organization_id, supplier_id, requirement, status, evidence_notes)
   values
     (cf1, demo_org, s_microcore, 'Annual security risk assessment conducted', 'compliant', 'Assessment completed 2026-02-15'),
@@ -102,8 +111,10 @@ begin
 
   insert into public.compliance_frameworks (organization_id, name, description, category)
   values (demo_org, 'EU Conflict Minerals Regulation', 'Due diligence obligations for importers of tin, tantalum, tungsten, and gold.', 'regulatory')
+  on conflict (organization_id, name) do update set description = excluded.description
   returning id into cf2;
 
+  delete from public.compliance_items where framework_id = cf2 and organization_id = demo_org;
   insert into public.compliance_items (framework_id, organization_id, supplier_id, requirement, status, evidence_notes)
   values
     (cf2, demo_org, s_microcore, 'Smelter/refiner identification and RMAP audit', 'compliant', 'All smelters RMAP conformant'),
@@ -152,24 +163,26 @@ begin
         sanctions_active = excluded.sanctions_active,
         trade_restriction_notes = excluded.trade_restriction_notes;
 
-  -- M11.S1: Performance records (3 per supplier = 15 records)
-  insert into public.supplier_performance_records (organization_id, supplier_id, period_start, period_end, on_time_delivery_rate, quality_rejection_rate, lead_time_variance_days, responsiveness_score, overall_rating)
-  values
-    (demo_org, s_microcore, '2025-10-01', '2025-12-31', 94.50, 1.20, 2, 4, 89.12),
-    (demo_org, s_microcore, '2026-01-01', '2026-01-31', 92.00, 1.50, 3, 4, 86.55),
-    (demo_org, s_microcore, '2026-02-01', '2026-02-28', 96.00, 0.80, 1, 5, 92.46),
-    (demo_org, s_pacific, '2025-10-01', '2025-12-31', 88.00, 3.50, 4, 3, 78.75),
-    (demo_org, s_pacific, '2026-01-01', '2026-01-31', 90.00, 2.80, 3, 3, 81.96),
-    (demo_org, s_pacific, '2026-02-01', '2026-02-28', 91.50, 2.20, 2, 4, 85.31),
-    (demo_org, s_nordic, '2025-10-01', '2025-12-31', 97.00, 0.50, 1, 5, 94.55),
-    (demo_org, s_nordic, '2026-01-01', '2026-01-31', 96.50, 0.60, 0, 5, 94.42),
-    (demo_org, s_nordic, '2026-02-01', '2026-02-28', 98.00, 0.30, 0, 5, 96.11),
-    (demo_org, s_sierra, '2025-10-01', '2025-12-31', 82.00, 5.50, 6, 3, 72.55),
-    (demo_org, s_sierra, '2026-01-01', '2026-01-31', 85.00, 4.20, 5, 3, 76.74),
-    (demo_org, s_sierra, '2026-02-01', '2026-02-28', 84.00, 4.80, 4, 3, 75.06),
-    (demo_org, s_atlas, '2025-10-01', '2025-12-31', 91.00, 2.00, 2, 4, 84.80),
-    (demo_org, s_atlas, '2026-01-01', '2026-01-31', 93.00, 1.80, 1, 4, 87.46),
-    (demo_org, s_atlas, '2026-02-01', '2026-02-28', 92.00, 1.50, 2, 4, 86.55);
+  -- M11.S1: Performance records (3 per supplier = 15 records) — guard against duplicates
+  if not exists (select 1 from public.supplier_performance_records where organization_id = demo_org and supplier_id = s_microcore and period_start = '2025-10-01') then
+    insert into public.supplier_performance_records (organization_id, supplier_id, period_start, period_end, on_time_delivery_rate, quality_rejection_rate, lead_time_variance_days, responsiveness_score, overall_rating)
+    values
+      (demo_org, s_microcore, '2025-10-01', '2025-12-31', 94.50, 1.20, 2, 4, 89.12),
+      (demo_org, s_microcore, '2026-01-01', '2026-01-31', 92.00, 1.50, 3, 4, 86.55),
+      (demo_org, s_microcore, '2026-02-01', '2026-02-28', 96.00, 0.80, 1, 5, 92.46),
+      (demo_org, s_pacific, '2025-10-01', '2025-12-31', 88.00, 3.50, 4, 3, 78.75),
+      (demo_org, s_pacific, '2026-01-01', '2026-01-31', 90.00, 2.80, 3, 3, 81.96),
+      (demo_org, s_pacific, '2026-02-01', '2026-02-28', 91.50, 2.20, 2, 4, 85.31),
+      (demo_org, s_nordic, '2025-10-01', '2025-12-31', 97.00, 0.50, 1, 5, 94.55),
+      (demo_org, s_nordic, '2026-01-01', '2026-01-31', 96.50, 0.60, 0, 5, 94.42),
+      (demo_org, s_nordic, '2026-02-01', '2026-02-28', 98.00, 0.30, 0, 5, 96.11),
+      (demo_org, s_sierra, '2025-10-01', '2025-12-31', 82.00, 5.50, 6, 3, 72.55),
+      (demo_org, s_sierra, '2026-01-01', '2026-01-31', 85.00, 4.20, 5, 3, 76.74),
+      (demo_org, s_sierra, '2026-02-01', '2026-02-28', 84.00, 4.80, 4, 3, 75.06),
+      (demo_org, s_atlas, '2025-10-01', '2025-12-31', 91.00, 2.00, 2, 4, 84.80),
+      (demo_org, s_atlas, '2026-01-01', '2026-01-31', 93.00, 1.80, 1, 4, 87.46),
+      (demo_org, s_atlas, '2026-02-01', '2026-02-28', 92.00, 1.50, 2, 4, 86.55);
+  end if;
 
   -- M11.S2: Inventory levels (6 parts)
   insert into public.part_inventory_levels (organization_id, part_id, current_stock, safety_stock, reorder_point, max_stock, avg_daily_consumption, days_of_supply, risk_flag)
@@ -199,21 +212,25 @@ begin
         status = excluded.status,
         config = excluded.config;
 
-  -- M12.S2: Transportation routes (3)
-  insert into public.transportation_routes (organization_id, name, origin_facility_id, destination_name, transport_mode, estimated_transit_days, risk_level, active_disruptions)
-  values
-    (demo_org, 'Taiwan-US MCU Shipment', fac_hsinchu, 'Phoenix Integration Center', 'ocean', 28, 'medium', null),
-    (demo_org, 'Malaysia-DE PCB Express', fac_penang, 'Leipzig Assembly Hub', 'air', 3, 'low', null),
-    (demo_org, 'Germany Internal Transfer', fac_bavaria, 'Leipzig Assembly Hub', 'road', 1, 'low', null);
+  -- M12.S2: Transportation routes (3) — guard against duplicates
+  if not exists (select 1 from public.transportation_routes where organization_id = demo_org and name = 'Taiwan-US MCU Shipment') then
+    insert into public.transportation_routes (organization_id, name, origin_facility_id, destination_name, transport_mode, estimated_transit_days, risk_level, active_disruptions)
+    values
+      (demo_org, 'Taiwan-US MCU Shipment', fac_hsinchu, 'Phoenix Integration Center', 'ocean', 28, 'medium', null),
+      (demo_org, 'Malaysia-DE PCB Express', fac_penang, 'Leipzig Assembly Hub', 'air', 3, 'low', null),
+      (demo_org, 'Germany Internal Transfer', fac_bavaria, 'Leipzig Assembly Hub', 'road', 1, 'low', null);
+  end if;
 
-  -- M12.S1: Notifications (5 seed entries)
-  insert into public.notifications (organization_id, title, message, type, reference_type)
-  values
-    (demo_org, 'System: Phase 2 Features Active', 'All M8-M12 features have been deployed. Explore mitigation plans, compliance tracking, and more.', 'system', 'system'),
-    (demo_org, 'Alert: MicroCore Semiconductors Risk Elevated', 'Risk score for MicroCore Semiconductors has exceeded threshold. Review recommended.', 'alert', 'alert'),
-    (demo_org, 'Compliance: ISO 28000 Review Overdue', 'Nordic Power Systems incident response plan test is overdue by 15 months.', 'compliance', 'compliance'),
-    (demo_org, 'Mitigation: Dual-Source Strategy In Progress', 'Qualification testing for alternate MCU supplier is underway.', 'mitigation', 'mitigation'),
-    (demo_org, 'Incident: Supply Chain Disruption Response', 'An incident response has been initiated for a critical supplier risk event.', 'incident', 'incident');
+  -- M12.S1: Notifications (5 seed entries) — guard against duplicates
+  if not exists (select 1 from public.notifications where organization_id = demo_org and title = 'System: Phase 2 Features Active') then
+    insert into public.notifications (organization_id, title, message, type, reference_type)
+    values
+      (demo_org, 'System: Phase 2 Features Active', 'All M8-M12 features have been deployed. Explore mitigation plans, compliance tracking, and more.', 'system', 'system'),
+      (demo_org, 'Alert: MicroCore Semiconductors Risk Elevated', 'Risk score for MicroCore Semiconductors has exceeded threshold. Review recommended.', 'alert', 'alert'),
+      (demo_org, 'Compliance: ISO 28000 Review Overdue', 'Nordic Power Systems incident response plan test is overdue by 15 months.', 'compliance', 'compliance'),
+      (demo_org, 'Mitigation: Dual-Source Strategy In Progress', 'Qualification testing for alternate MCU supplier is underway.', 'mitigation', 'mitigation'),
+      (demo_org, 'Incident: Supply Chain Disruption Response', 'An incident response has been initiated for a critical supplier risk event.', 'incident', 'incident');
+  end if;
 
   raise notice 'Phase 2 seed data applied successfully for org %', demo_org;
 end

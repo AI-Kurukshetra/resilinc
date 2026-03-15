@@ -1,5 +1,5 @@
 Execution guardrails for this repo:
-1) Read in order: doc/TASKS.md -> doc/PROGRESS.md -> doc/BLOCKERS.md -> doc/CHANGELOG.md -> doc/DECISIONS.md -> doc/SCHEMA.md -> doc/IMPLEMENTATION_STATE.md -> doc/SKILL_ROUTER.md -> doc/blueprint/E2E_DEVELOPMENT_PLAN.md.
+1) Read in order: doc/TASKS.md -> doc/PROGRESS.md -> doc/BLOCKERS.md -> doc/CHANGELOG.md -> doc/DECISIONS.md -> doc/SCHEMA.md -> doc/SEEDING.md -> doc/IMPLEMENTATION_STATE.md -> doc/SKILL_ROUTER.md -> doc/blueprint/E2E_DEVELOPMENT_PLAN.md.
 2) Pick exactly one next unchecked subtask ID from doc/TASKS.md (format Mx.Sy or Mx.Sy.z), complete it fully, then update TASKS/PROGRESS/CHANGELOG/DECISIONS/SCHEMA as applicable.
 3) Use skill routing from doc/SKILL_ROUTER.md. Do not create parallel folder structures or duplicate docs.
 4) Before finalizing, run scripts/preflight.sh and report pass/fail. If pnpm exists and node_modules exists, run lint/typecheck/test too.

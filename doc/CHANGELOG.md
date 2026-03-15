@@ -230,3 +230,18 @@
   - Client component `weather-risk-panel.tsx` on analytics page showing recent natural disaster events and "Run Weather Scan" button.
   - Phase 2 consolidated seed data `supabase/seed_phase2.sql` for all M8-M12 tables.
   - Updated `dashboard-nav.tsx` with grouped navigation (Monitor/Respond/Manage) and integrated notification bell.
+
+### 2026-03-15 — Phase 3 Seed Data and Seeding Documentation
+- Created `supabase/seed_phase3.sql` — comprehensive risk pipeline demo data:
+  - 25 risk events across 6 categories (geopolitical, cyber, natural disaster, supply disruption, quality, regulatory) spread over 90 days
+  - 27 risk-event-supplier links with impact levels
+  - 5 supplier risk scores with trend and explanation JSON
+  - 20 alerts (7 open, 6 acknowledged, 7 resolved) with full workflow fields
+  - 43 alert events (audit trail: generated, escalated, acknowledged, resolved)
+  - 10 incidents (3 open, 4 in-progress, 3 closed) with owner assignments
+  - 35 incident actions with todo/doing/done/blocked statuses
+- Fixed `supabase/seed_phase2.sql` idempotency: added `ON CONFLICT` for compliance_frameworks, `IF NOT EXISTS` guards for mitigation_plans, performance_records, transportation_routes, notifications.
+- Created `doc/SEEDING.md` — comprehensive seeding guide for future agents covering: architecture, conventions (idempotency, PL/pgSQL patterns, entity resolution), data design standards, step-by-step instructions for adding seed data to new features, troubleshooting, and agent checklist.
+- Updated `doc/SCHEMA.md` with Phase 3 seed summary, user linking documentation, and link to SEEDING.md.
+- Updated `doc/DECISIONS.md` with phased seed architecture and idempotency decisions.
+- Updated `suffix_prompt.md` to include `doc/SEEDING.md` in the mandatory read order.
