@@ -4,6 +4,7 @@
 - `supabase/migrations/20260314110000_init_resilinc_mvp.sql`
 - `supabase/migrations/20260314170000_m2_hardening.sql`
 - `supabase/migrations/20260314183000_m4_risk_alert_incident_workflows.sql`
+- `supabase/migrations/20260315100000_m8_analytics_impact.sql`
 
 ## Core Tables
 - `organizations`
@@ -20,6 +21,7 @@
 - `alert_events`
 - `incidents`
 - `incident_actions`
+- `part_financial_profiles`
 
 ## Key Relationships
 - Organization -> suppliers, facilities, parts, risk events, alerts, incidents (`organization_id` FK)
@@ -86,6 +88,21 @@ Assumptions:
 - At least one authenticated user exists before seeding.
 - Seed prioritizes realistic hierarchy for demo workflows (tier 1/2/3 exposure).
 - Script can be re-run safely (`on conflict` updates).
+
+## M8 Part Financial Profiles (M8.S3)
+`part_financial_profiles`:
+- `id` uuid PK
+- `organization_id` FK -> organizations
+- `part_id` FK -> parts
+- `annual_spend` numeric(14,2) default 0
+- `unit_cost` numeric(10,2)
+- `annual_volume` integer
+- `lead_time_days` integer
+- `currency` text default 'USD'
+- `updated_at` timestamptz
+- UNIQUE constraint on `(organization_id, part_id)`
+- RLS: org-scoped select/insert/update/delete via `is_org_member()`
+- Indexes: `idx_part_financial_profiles_org`, `idx_part_financial_profiles_part`
 
 ## Storage
 - Private bucket: `incident-evidence`.

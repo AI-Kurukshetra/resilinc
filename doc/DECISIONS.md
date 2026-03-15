@@ -164,3 +164,15 @@ Rationale: Some local/dev environments cannot reliably deliver confirmation emai
 
 ## 2026-03-14 — Add guarded service-role fallback for first-login workspace bootstrap
 Rationale: Some environments intermittently lose user JWT context during initial dashboard bootstrap, causing RLS denials on `organizations`/`organization_members` inserts despite successful authentication. Retrying bootstrap with service-role only after verified `auth.getUser()` preserves signup continuity while keeping scope constrained to the current authenticated user.
+
+## 2026-03-15 — Use react-force-graph-2d with central hub layout for supply chain network
+Rationale: A hub-and-spoke force graph with the organization as central node and suppliers as peripheral nodes intuitively represents the supply chain hierarchy; supplier node size reflects criticality + part count, and color-coding by criticality tier provides instant visual risk ranking.
+
+## 2026-03-15 — Server-side time-series aggregation instead of client-side rollup
+Rationale: Fetching raw risk events and grouping by period server-side keeps the client payload small and avoids shipping large datasets to the browser; the analytics API returns pre-bucketed time-series data ready for recharts consumption.
+
+## 2026-03-15 — Compute business impact as annualSpend × (riskScore/100) for disruption cost
+Rationale: A simple multiplicative model provides an intuitive, explainable revenue-at-risk estimate that correlates spend exposure with current risk level; more sophisticated models can be layered later without changing the API contract.
+
+## 2026-03-15 — Store part financial profiles in a dedicated table rather than extending parts
+Rationale: Financial data (annual spend, unit cost, volume, lead time) has different update patterns and ownership from core part metadata; a separate `part_financial_profiles` table with unique constraint on `(organization_id, part_id)` maintains clean separation while enabling the impact analysis feature.

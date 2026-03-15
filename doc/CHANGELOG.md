@@ -145,3 +145,24 @@
 - Fixed first-login workspace bootstrap reliability in `app/(dashboard)/layout.tsx`:
   - when authenticated-user inserts into `organizations`/`organization_members` fail with RLS/permission errors, bootstrap now retries via a guarded service-role fallback tied to the verified `user.id`,
   - fallback path is idempotent (reuses existing membership/org if present, upserts profile + owner membership) and returns a resolved `organizationId` so signup can proceed into the dashboard.
+
+## 2026-03-15
+- Added M8.S1 interactive supply chain network graph:
+  - Server page `app/(dashboard)/supply-chain/page.tsx` fetching `listSupplierNetworkOverview()`.
+  - Client `network-graph.tsx` using `react-force-graph-2d` with supplier nodes colored by criticality, central hub, and click interaction.
+  - Client `exposure-panel.tsx` showing supplier exposure details (facilities, parts, stats) on node click via `/api/supply-chain/exposure/[supplierId]`.
+  - Loading/error states for supply-chain route.
+- Added M8.S2 historical risk analytics:
+  - Service `lib/analytics/historical.ts` with `getRiskEventTimeSeries()` (groups risk events by day/week/month with severity breakdown) and `getScoreTrendHistory()` (current supplier risk scores).
+  - Zod validation `lib/validations/analytics.ts` with `HistoricalQuerySchema` (startDate, endDate, granularity, supplierId).
+  - API endpoint `GET /api/analytics/risk-trends` returning time-series buckets and score trend points.
+  - Analytics dashboard page `app/(dashboard)/analytics/page.tsx` with `risk-trend-chart.tsx` (recharts stacked BarChart for severity distribution + LineChart for scores) and `disruption-timeline.tsx` (recent event list).
+  - Loading/error states for analytics route.
+- Added M8.S3 business impact analysis:
+  - Migration `supabase/migrations/20260315100000_m8_analytics_impact.sql` adding `part_financial_profiles` table with org-scoped RLS policies and indexes.
+  - Service `lib/impact-analysis/service.ts` with `calculateBusinessImpact()` (sums linked part annual spend, computes revenue-at-risk = spend × riskScore/100), plus `getPartFinancialProfile()`, `upsertPartFinancialProfile()`, `updatePartFinancialProfile()`.
+  - Validation `lib/validations/impact-analysis.ts` with create/update/query schemas.
+  - API endpoints: `GET /api/impact-analysis/[supplierId]` and `GET/PUT /api/parts/[partId]/financial`.
+  - Business impact section component `business-impact-section.tsx` integrated into supplier detail page.
+- Updated dashboard navigation with "Supply Chain" and "Analytics" links.
+- Added dependencies: `react-force-graph-2d`, `recharts`.

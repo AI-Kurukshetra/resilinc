@@ -96,3 +96,30 @@
 [2026-03-14 19:07] coordinator — Added signup confirmation improvements: pass host-aware `emailRedirectTo` on signup and shipped resend-confirmation API + login/signup UI form; revalidated with lint/typecheck/test/build.
 [2026-03-14 19:12] coordinator — Resolved nested-form hydration bug on signup and added `AUTH_DEV_AUTO_CONFIRM_SIGNUP` localhost fallback path in signup API for dev environments where confirmation emails are not delivered.
 [2026-03-14 19:17] coordinator — Fixed signup workspace bootstrap RLS failure by adding a service-role fallback in dashboard org bootstrap for authenticated users when `organizations`/membership inserts are denied by row-level security; revalidated with `pnpm lint`, `pnpm typecheck`, and `pnpm test`.
+
+[2026-03-15 13:52] coordinator — Completed M8 Visual Intelligence and Historical Analysis (M8.S1, M8.S2, M8.S3):
+  M8.S1 Supply chain network graph UI:
+    + app/(dashboard)/supply-chain/page.tsx (server page fetching listSupplierNetworkOverview)
+    + app/(dashboard)/supply-chain/_components/network-graph-view.tsx (orchestrator)
+    + app/(dashboard)/supply-chain/_components/network-graph.tsx (react-force-graph-2d with criticality colors)
+    + app/(dashboard)/supply-chain/_components/exposure-panel.tsx (click-to-expand supplier exposure)
+    + app/(dashboard)/supply-chain/loading.tsx, error.tsx
+  M8.S2 Historical risk analytics:
+    + lib/analytics/historical.ts (getRiskEventTimeSeries, getScoreTrendHistory)
+    + lib/validations/analytics.ts (HistoricalQuerySchema)
+    + app/api/analytics/risk-trends/route.ts
+    + app/(dashboard)/analytics/page.tsx
+    + app/(dashboard)/analytics/_components/risk-trend-chart.tsx (recharts)
+    + app/(dashboard)/analytics/_components/disruption-timeline.tsx
+    + app/(dashboard)/analytics/loading.tsx, error.tsx
+  M8.S3 Business impact analysis:
+    + supabase/migrations/20260315100000_m8_analytics_impact.sql (part_financial_profiles table)
+    + lib/impact-analysis/service.ts (calculateBusinessImpact, CRUD)
+    + lib/validations/impact-analysis.ts
+    + app/api/impact-analysis/[supplierId]/route.ts
+    + app/api/parts/[partId]/financial/route.ts
+    + app/(dashboard)/suppliers/_components/business-impact-section.tsx
+    ~ app/(dashboard)/suppliers/[supplierId]/page.tsx (added business impact section)
+    ~ app/(dashboard)/_components/dashboard-nav.tsx (added Supply Chain + Analytics links)
+  Deps added: react-force-graph-2d, recharts
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓  scripts/preflight.sh ✓

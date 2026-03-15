@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SupplierRiskTrend } from "@/app/(dashboard)/suppliers/_components/supplier-risk-trend";
+import { BusinessImpactSection } from "@/app/(dashboard)/suppliers/_components/business-impact-section";
 import { getDashboardContext } from "@/lib/dashboard/context";
+import { calculateBusinessImpact } from "@/lib/impact-analysis/service";
 
 export const metadata: Metadata = {
   title: "Supplier Detail | Resilinc Lite",
@@ -154,6 +156,13 @@ export default async function SupplierDetailPage({ params }: SupplierDetailRoute
     riskEvents = (eventRows as RiskEventRow[] | null) ?? [];
   }
 
+  let businessImpact = null;
+  try {
+    businessImpact = await calculateBusinessImpact(supabase, organizationId, supplierId);
+  } catch {
+    // Business impact is optional — do not block the page on failure
+  }
+
   return (
     <main className="space-y-4">
       <header className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -188,6 +197,8 @@ export default async function SupplierDetailPage({ params }: SupplierDetailRoute
           ) : null}
         </div>
       </header>
+
+      {businessImpact && <BusinessImpactSection impact={businessImpact} />}
 
       <section className="grid gap-4 lg:grid-cols-2">
         <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

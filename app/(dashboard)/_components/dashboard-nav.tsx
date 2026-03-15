@@ -8,8 +8,10 @@ const NAV_ITEMS = [
   { href: "/overview", label: "Overview" },
   { href: "/risk-events", label: "Risk Events" },
   { href: "/suppliers", label: "Suppliers" },
+  { href: "/supply-chain", label: "Supply Chain" },
   { href: "/alerts", label: "Alerts" },
   { href: "/incidents", label: "Incidents" },
+  { href: "/analytics", label: "Analytics" },
   { href: "/reports", label: "Reports" },
 ] as const;
 
