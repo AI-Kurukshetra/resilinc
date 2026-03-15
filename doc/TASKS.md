@@ -153,84 +153,84 @@ Reference: `doc/blueprint/E2E_DEVELOPMENT_PLAN.md` (Phase 2 section)
 - [x] (2026-03-15 13:52) M8.S3.e Extend supplier detail page with business impact summary section
 
 ### M9 Risk Mitigation and Compliance
-- [ ] M9.S1 Risk mitigation planning
-- [ ] M9.S1.a Migration `20260315110000_m9_mitigation_compliance.sql` adding `mitigation_plans` + `mitigation_actions` tables
-- [ ] M9.S1.b Service `lib/mitigation/service.ts` (CRUD + status workflow: draft→active→completed→archived)
-- [ ] M9.S1.c Validation `lib/validations/mitigation.ts`
-- [ ] M9.S1.d API routes: `GET/POST /api/mitigation-plans`, `GET/PATCH /api/mitigation-plans/[planId]`
-- [ ] M9.S1.e API routes: `GET/POST /api/mitigation-plans/[planId]/actions`, `PATCH .../actions/[actionId]/status`
-- [ ] M9.S1.f Dashboard pages: `mitigation/page.tsx` (list), `mitigation/[planId]/page.tsx` (detail)
-- [ ] M9.S1.g Client components: `plan-create-form.tsx`, `plan-action-list.tsx`
-- [ ] M9.S2 Compliance and regulatory tracking
-- [ ] M9.S2.a Add `compliance_frameworks` + `compliance_items` tables to M9 migration
-- [ ] M9.S2.b Service `lib/compliance/service.ts` (CRUD + compliance percentage summaries)
-- [ ] M9.S2.c Validation `lib/validations/compliance.ts`
-- [ ] M9.S2.d API routes: `GET/POST /api/compliance/frameworks`, `GET/POST .../[frameworkId]/items`, `PATCH .../items/[itemId]`
-- [ ] M9.S2.e Dashboard pages: `compliance/page.tsx` (framework cards + progress bars), `compliance/[frameworkId]/page.tsx`
-- [ ] M9.S2.f Client components: `compliance-status-badge.tsx`, `item-assessment-form.tsx`
-- [ ] M9.S2.g Dashboard nav update for Mitigation + Compliance links
+- [x] (2026-03-15 21:13) M9.S1 Risk mitigation planning
+- [x] (2026-03-15 21:13) M9.S1.a Migration `20260315110000_m9_mitigation_compliance.sql` adding `mitigation_plans` + `mitigation_actions` tables
+- [x] (2026-03-15 21:13) M9.S1.b Service `lib/mitigation/service.ts` (CRUD + status workflow: draft→active→completed→archived)
+- [x] (2026-03-15 21:13) M9.S1.c Validation `lib/validations/mitigation.ts`
+- [x] (2026-03-15 21:13) M9.S1.d API routes: `GET/POST /api/mitigation-plans`, `GET/PATCH /api/mitigation-plans/[planId]`
+- [x] (2026-03-15 21:13) M9.S1.e API routes: `GET/POST /api/mitigation-plans/[planId]/actions`, `PATCH .../actions/[actionId]/status`
+- [x] (2026-03-15 21:13) M9.S1.f Dashboard pages: `mitigation/page.tsx` (list), `mitigation/[planId]/page.tsx` (detail)
+- [x] (2026-03-15 21:13) M9.S1.g Client components: `plan-create-form.tsx`, `plan-action-list.tsx`
+- [x] (2026-03-15 21:13) M9.S2 Compliance and regulatory tracking
+- [x] (2026-03-15 21:13) M9.S2.a Add `compliance_frameworks` + `compliance_items` tables to M9 migration
+- [x] (2026-03-15 21:13) M9.S2.b Service `lib/compliance/service.ts` (CRUD + compliance percentage summaries)
+- [x] (2026-03-15 21:13) M9.S2.c Validation `lib/validations/compliance.ts`
+- [x] (2026-03-15 21:13) M9.S2.d API routes: `GET/POST /api/compliance/frameworks`, `GET/POST .../[frameworkId]/items`, `PATCH .../items/[itemId]`
+- [x] (2026-03-15 21:13) M9.S2.e Dashboard pages: `compliance/page.tsx` (framework cards + progress bars), `compliance/[frameworkId]/page.tsx`
+- [x] (2026-03-15 21:13) M9.S2.f Client components: `compliance-status-badge.tsx`, `item-assessment-form.tsx`
+- [x] (2026-03-15 21:13) M9.S2.g Dashboard nav update for Mitigation + Compliance links
 
 ### M10 Extended Risk Dimensions
-- [ ] M10.S1 ESG risk evaluation
-- [ ] M10.S1.a Migration `20260315120000_m10_extended_risk.sql` adding `supplier_esg_scores` table
-- [ ] M10.S1.b Service `lib/esg/service.ts` (CRUD + composite score: E:40%, S:35%, G:25%)
-- [ ] M10.S1.c Validation `lib/validations/esg.ts`
-- [ ] M10.S1.d API routes: `GET/POST /api/esg-scores`, `GET/PUT /api/esg-scores/[supplierId]`
-- [ ] M10.S1.e Extend supplier detail page with ESG score card component
-- [ ] M10.S2 Financial risk assessment
-- [ ] M10.S2.a Add `supplier_financial_health` table to M10 migration
-- [ ] M10.S2.b Service `lib/financial-risk/service.ts` (CRUD + Altman Z-score risk level computation)
-- [ ] M10.S2.c Validation `lib/validations/financial-risk.ts`
-- [ ] M10.S2.d API routes: `GET/POST /api/financial-risk`, `GET/PUT /api/financial-risk/[supplierId]`
-- [ ] M10.S2.e Extend supplier detail page with financial health card component
-- [ ] M10.S3 Geopolitical risk enhancement
-- [ ] M10.S3.a Add `geopolitical_risk_profiles` table to M10 migration
-- [ ] M10.S3.b Service `lib/geopolitical/service.ts` (CRUD + supplier-region linkage)
-- [ ] M10.S3.c Validation `lib/validations/geopolitical.ts`
-- [ ] M10.S3.d API routes: `GET/POST /api/geopolitical-risk`, `GET/PUT /api/geopolitical-risk/[regionCode]`
-- [ ] M10.S3.e Add `geo-risk-map.tsx` region risk summary to analytics page
+- [x] (2026-03-15 21:35) M10.S1 ESG risk evaluation
+- [x] (2026-03-15 21:35) M10.S1.a Migration `20260315120000_m10_extended_risk.sql` adding `supplier_esg_scores` table
+- [x] (2026-03-15 21:35) M10.S1.b Service `lib/esg/service.ts` (CRUD + composite score: E:40%, S:35%, G:25%)
+- [x] (2026-03-15 21:35) M10.S1.c Validation `lib/validations/esg.ts`
+- [x] (2026-03-15 21:35) M10.S1.d API routes: `GET/POST /api/esg-scores`, `GET/PUT /api/esg-scores/[supplierId]`
+- [x] (2026-03-15 21:35) M10.S1.e Extend supplier detail page with ESG score card component
+- [x] (2026-03-15 21:35) M10.S2 Financial risk assessment
+- [x] (2026-03-15 21:35) M10.S2.a Add `supplier_financial_health` table to M10 migration
+- [x] (2026-03-15 21:35) M10.S2.b Service `lib/financial-risk/service.ts` (CRUD + Altman Z-score risk level computation)
+- [x] (2026-03-15 21:35) M10.S2.c Validation `lib/validations/financial-risk.ts`
+- [x] (2026-03-15 21:35) M10.S2.d API routes: `GET/POST /api/financial-risk`, `GET/PUT /api/financial-risk/[supplierId]`
+- [x] (2026-03-15 21:35) M10.S2.e Extend supplier detail page with financial health card component
+- [x] (2026-03-15 21:35) M10.S3 Geopolitical risk enhancement
+- [x] (2026-03-15 21:35) M10.S3.a Add `geopolitical_risk_profiles` table to M10 migration
+- [x] (2026-03-15 21:35) M10.S3.b Service `lib/geopolitical/service.ts` (CRUD + supplier-region linkage)
+- [x] (2026-03-15 21:35) M10.S3.c Validation `lib/validations/geopolitical.ts`
+- [x] (2026-03-15 21:35) M10.S3.d API routes: `GET/POST /api/geopolitical-risk`, `GET/PUT /api/geopolitical-risk/[regionCode]`
+- [x] (2026-03-15 21:35) M10.S3.e Add `geo-risk-map.tsx` region risk summary to analytics page
 
 ### M11 Operational Features
-- [ ] M11.S1 Supplier performance tracking
-- [ ] M11.S1.a Migration `20260315130000_m11_operations.sql` adding `supplier_performance_records` table
-- [ ] M11.S1.b Service `lib/performance/service.ts` (CRUD + overall rating: delivery 40%, quality 30%, lead time 15%, responsiveness 15%)
-- [ ] M11.S1.c Validation `lib/validations/performance.ts`
-- [ ] M11.S1.d API routes: `GET/POST /api/performance`, `GET /api/performance/[supplierId]`
-- [ ] M11.S1.e Extend supplier detail page with performance chart section
-- [ ] M11.S2 Inventory risk assessment
-- [ ] M11.S2.a Add `part_inventory_levels` table to M11 migration
-- [ ] M11.S2.b Service `lib/inventory/service.ts` (CRUD + risk flag: stockout/critical/low/adequate, days-of-supply)
-- [ ] M11.S2.c Validation `lib/validations/inventory.ts`
-- [ ] M11.S2.d API routes: `GET/POST /api/inventory`, `GET/PUT /api/inventory/[partId]`
-- [ ] M11.S2.e Dashboard page: `inventory/page.tsx` with color-coded stock level bars
-- [ ] M11.S2.f Dashboard nav update for Inventory link
-- [ ] M11.S3 Integration management
-- [ ] M11.S3.a Add `integrations` table to M11 migration
-- [ ] M11.S3.b Service `lib/integrations/service.ts` (CRUD + connection test stub)
-- [ ] M11.S3.c Validation `lib/validations/integrations.ts`
-- [ ] M11.S3.d API routes: `GET/POST /api/integrations`, `GET/PATCH /api/integrations/[integrationId]`, `POST .../test`
-- [ ] M11.S3.e Dashboard page: `settings/integrations/page.tsx` with integration status cards
-- [ ] M11.S3.f Dashboard nav update for Settings link
+- [x] (2026-03-15 21:48) M11.S1 Supplier performance tracking
+- [x] (2026-03-15 21:48) M11.S1.a Migration `20260315130000_m11_operations.sql` adding `supplier_performance_records` table
+- [x] (2026-03-15 21:48) M11.S1.b Service `lib/performance/service.ts` (CRUD + overall rating: delivery 40%, quality 30%, lead time 15%, responsiveness 15%)
+- [x] (2026-03-15 21:48) M11.S1.c Validation `lib/validations/performance.ts`
+- [x] (2026-03-15 21:48) M11.S1.d API routes: `GET/POST /api/performance`, `GET /api/performance/[supplierId]`
+- [x] (2026-03-15 21:48) M11.S1.e Extend supplier detail page with performance chart section
+- [x] (2026-03-15 21:48) M11.S2 Inventory risk assessment
+- [x] (2026-03-15 21:48) M11.S2.a Add `part_inventory_levels` table to M11 migration
+- [x] (2026-03-15 21:48) M11.S2.b Service `lib/inventory/service.ts` (CRUD + risk flag: stockout/critical/low/adequate, days-of-supply)
+- [x] (2026-03-15 21:48) M11.S2.c Validation `lib/validations/inventory.ts`
+- [x] (2026-03-15 21:48) M11.S2.d API routes: `GET/POST /api/inventory`, `GET/PUT /api/inventory/[partId]`
+- [x] (2026-03-15 21:48) M11.S2.e Dashboard page: `inventory/page.tsx` with color-coded stock level bars
+- [x] (2026-03-15 21:48) M11.S2.f Dashboard nav update for Inventory link
+- [x] (2026-03-15 21:48) M11.S3 Integration management
+- [x] (2026-03-15 21:48) M11.S3.a Add `integrations` table to M11 migration
+- [x] (2026-03-15 21:48) M11.S3.b Service `lib/integrations/service.ts` (CRUD + connection test stub)
+- [x] (2026-03-15 21:48) M11.S3.c Validation `lib/validations/integrations.ts`
+- [x] (2026-03-15 21:48) M11.S3.d API routes: `GET/POST /api/integrations`, `GET/PATCH /api/integrations/[integrationId]`, `POST .../test`
+- [x] (2026-03-15 21:48) M11.S3.e Dashboard page: `settings/integrations/page.tsx` with integration status cards
+- [x] (2026-03-15 21:48) M11.S3.f Dashboard nav update for Settings link
 
 ### M12 Communication, Transportation, and Final Polish
-- [ ] M12.S1 Communication hub (notifications)
-- [ ] M12.S1.a Migration `20260315140000_m12_comms_transport.sql` adding `notifications` table
-- [ ] M12.S1.b Service `lib/notifications/service.ts` (create, list, markRead, unreadCount)
-- [ ] M12.S1.c Validation `lib/validations/notifications.ts`
-- [ ] M12.S1.d API routes: `GET/POST /api/notifications`, `POST /api/notifications/read`, `GET /api/notifications/count`
-- [ ] M12.S1.e Client `notification-bell.tsx` in dashboard nav with unread badge + dropdown
-- [ ] M12.S1.f Wire notification creation into existing alert/incident service flows
-- [ ] M12.S2 Transportation risk monitoring
-- [ ] M12.S2.a Add `transportation_routes` table to M12 migration
-- [ ] M12.S2.b Service `lib/transportation/service.ts` (CRUD + route risk assessment)
-- [ ] M12.S2.c Validation `lib/validations/transportation.ts`
-- [ ] M12.S2.d API routes: `GET/POST /api/transportation`, `GET/PATCH /api/transportation/[routeId]`
-- [ ] M12.S2.e Dashboard page: `transportation/page.tsx` with route risk cards
-- [ ] M12.S2.f Dashboard nav update for Transportation link
-- [ ] M12.S3 Natural disaster wiring and Phase 2 polish
-- [ ] M12.S3.a `lib/natural-disaster/monitor.ts` — scan facilities using existing WeatherRiskAdapter
-- [ ] M12.S3.b API endpoint: `POST /api/natural-disaster/scan`
-- [ ] M12.S3.c `weather-risk-panel.tsx` on analytics page showing facility weather alerts
-- [ ] M12.S3.d Phase 2 consolidated seed data (`supabase/seed_phase2.sql`) for all M8–M12 tables
-- [ ] M12.S3.e Update dashboard nav with grouped categories (Monitor/Respond/Manage)
-- [ ] M12.S3.f Update all docs: TASKS, PROGRESS, CHANGELOG, DECISIONS, SCHEMA
+- [x] (2026-03-15 22:05) M12.S1 Communication hub (notifications)
+- [x] (2026-03-15 22:05) M12.S1.a Migration `20260315140000_m12_comms_transport.sql` adding `notifications` table
+- [x] (2026-03-15 22:05) M12.S1.b Service `lib/notifications/service.ts` (create, list, markRead, unreadCount)
+- [x] (2026-03-15 22:05) M12.S1.c Validation `lib/validations/notifications.ts`
+- [x] (2026-03-15 22:05) M12.S1.d API routes: `GET/POST /api/notifications`, `POST /api/notifications/read`, `GET /api/notifications/count`
+- [x] (2026-03-15 22:05) M12.S1.e Client `notification-bell.tsx` in dashboard nav with unread badge + dropdown
+- [x] (2026-03-15 22:05) M12.S1.f Wire notification creation into existing alert/incident service flows
+- [x] (2026-03-15 22:05) M12.S2 Transportation risk monitoring
+- [x] (2026-03-15 22:05) M12.S2.a Add `transportation_routes` table to M12 migration
+- [x] (2026-03-15 22:05) M12.S2.b Service `lib/transportation/service.ts` (CRUD + route risk assessment)
+- [x] (2026-03-15 22:05) M12.S2.c Validation `lib/validations/transportation.ts`
+- [x] (2026-03-15 22:05) M12.S2.d API routes: `GET/POST /api/transportation`, `GET/PATCH /api/transportation/[routeId]`
+- [x] (2026-03-15 22:05) M12.S2.e Dashboard page: `transportation/page.tsx` with route risk cards
+- [x] (2026-03-15 22:05) M12.S2.f Dashboard nav update for Transportation link
+- [x] (2026-03-15 22:05) M12.S3 Natural disaster wiring and Phase 2 polish
+- [x] (2026-03-15 22:05) M12.S3.a `lib/natural-disaster/monitor.ts` — scan facilities using existing WeatherRiskAdapter
+- [x] (2026-03-15 22:05) M12.S3.b API endpoint: `POST /api/natural-disaster/scan`
+- [x] (2026-03-15 22:05) M12.S3.c `weather-risk-panel.tsx` on analytics page showing facility weather alerts
+- [x] (2026-03-15 22:05) M12.S3.d Phase 2 consolidated seed data (`supabase/seed_phase2.sql`) for all M8–M12 tables
+- [x] (2026-03-15 22:05) M12.S3.e Update dashboard nav with grouped categories (Monitor/Respond/Manage)
+- [x] (2026-03-15 22:05) M12.S3.f Update all docs: TASKS, PROGRESS, CHANGELOG, DECISIONS, SCHEMA

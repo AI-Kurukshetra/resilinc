@@ -3,8 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SupplierRiskTrend } from "@/app/(dashboard)/suppliers/_components/supplier-risk-trend";
 import { BusinessImpactSection } from "@/app/(dashboard)/suppliers/_components/business-impact-section";
+import { EsgScoreCard } from "@/app/(dashboard)/suppliers/_components/esg-score-card";
+import { FinancialHealthCard } from "@/app/(dashboard)/suppliers/_components/financial-health-card";
+import { PerformanceChart } from "@/app/(dashboard)/suppliers/_components/performance-chart";
 import { getDashboardContext } from "@/lib/dashboard/context";
 import { calculateBusinessImpact } from "@/lib/impact-analysis/service";
+import { getEsgScore } from "@/lib/esg/service";
+import { getFinancialHealth } from "@/lib/financial-risk/service";
+import { getSupplierGeoRisk } from "@/lib/geopolitical/service";
+import { getPerformanceSummary } from "@/lib/performance/service";
 
 export const metadata: Metadata = {
   title: "Supplier Detail | Resilinc Lite",
@@ -163,6 +170,28 @@ export default async function SupplierDetailPage({ params }: SupplierDetailRoute
     // Business impact is optional — do not block the page on failure
   }
 
+  // M10: Extended risk dimensions — all optional, do not block page on failure
+  let esgScore = null;
+  let financialHealth = null;
+  let geoRisk = null;
+  try {
+    [esgScore, financialHealth, geoRisk] = await Promise.all([
+      getEsgScore(supabase, organizationId, supplierId).catch(() => null),
+      getFinancialHealth(supabase, organizationId, supplierId).catch(() => null),
+      getSupplierGeoRisk(supabase, organizationId, supplierId).catch(() => null),
+    ]);
+  } catch {
+    // Extended risk dimensions are optional
+  }
+
+  // M11: Supplier performance summary — optional
+  let perfSummary = null;
+  try {
+    perfSummary = await getPerformanceSummary(supabase, organizationId, supplierId);
+  } catch {
+    // Performance data is optional
+  }
+
   return (
     <main className="space-y-4">
       <header className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -199,6 +228,91 @@ export default async function SupplierDetailPage({ params }: SupplierDetailRoute
       </header>
 
       {businessImpact && <BusinessImpactSection impact={businessImpact} />}
+
+      {(esgScore || financialHealth) && (
+        <section className="grid gap-4 lg:grid-cols-2">
+          {esgScore && (
+            <EsgScoreCard
+              environmentalScore={esgScore.environmentalScore}
+              socialScore={esgScore.socialScore}
+              governanceScore={esgScore.governanceScore}
+              compositeScore={esgScore.compositeScore}
+              assessmentDate={esgScore.assessmentDate}
+              notes={esgScore.notes}
+            />
+          )}
+          {financialHealth && (
+            <FinancialHealthCard
+              creditRating={financialHealth.creditRating}
+              altmanZScore={financialHealth.altmanZScore}
+              revenueTrend={financialHealth.revenueTrend}
+              debtToEquity={financialHealth.debtToEquity}
+              daysPayableOutstanding={financialHealth.daysPayableOutstanding}
+              financialRiskLevel={financialHealth.financialRiskLevel}
+              assessedAt={financialHealth.assessedAt}
+              notes={financialHealth.notes}
+            />
+          )}
+        </section>
+      )}
+
+      {geoRisk && (
+        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">Geopolitical Risk</h2>
+          <p className="mt-1 text-xs text-slate-500">Region-level risk profile linked via supplier region code.</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-4 text-sm">
+            <div>
+              <p className="text-xs text-slate-500">Region</p>
+              <p className="font-semibold text-slate-900">{geoRisk.regionCode}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Risk Level</p>
+              <p className="font-semibold text-slate-900 capitalize">{geoRisk.riskLevel}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Stability Index</p>
+              <p className="font-semibold text-slate-900">{geoRisk.stabilityIndex !== null ? geoRisk.stabilityIndex.toFixed(1) : "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Sanctions</p>
+              <p className="font-semibold text-slate-900">{geoRisk.sanctionsActive ? "Active" : "None"}</p>
+            </div>
+          </div>
+          {geoRisk.tradeRestrictionNotes && (
+            <p className="mt-2 rounded-lg bg-slate-50 p-2 text-xs text-slate-600">{geoRisk.tradeRestrictionNotes}</p>
+          )}
+        </article>
+      )}
+
+      {perfSummary && (
+        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">Supplier Performance</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Latest period metrics ({perfSummary.periodCount} period{perfSummary.periodCount !== 1 ? "s" : ""} recorded)
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-4 text-sm">
+            <div>
+              <p className="text-xs text-slate-500">Overall Rating</p>
+              <p className="text-xl font-bold text-slate-900">{perfSummary.latestOverallRating.toFixed(1)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">On-Time Delivery</p>
+              <p className="text-xl font-bold text-blue-600">{perfSummary.latestDeliveryRate.toFixed(1)}%</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Quality Rejection</p>
+              <p className="text-xl font-bold text-amber-600">{perfSummary.latestQualityRate.toFixed(1)}%</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Responsiveness</p>
+              <p className="text-xl font-bold text-purple-600">{perfSummary.latestResponsiveness}/5</p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <PerformanceChart supplierId={supplierId} />
+          </div>
+        </article>
+      )}
 
       <section className="grid gap-4 lg:grid-cols-2">
         <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

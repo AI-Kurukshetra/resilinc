@@ -6,6 +6,7 @@ import type {
   AlertStatus,
 } from "@/lib/validations/alerts";
 import type { SupplierRiskScoreDTO } from "@/lib/risk-scoring/engine";
+import { createNotification } from "@/lib/notifications/service";
 
 interface AlertRow {
   id: string;
@@ -409,6 +410,17 @@ export async function evaluateAlertForSupplierScore(
       },
     });
 
+    // Non-blocking notification
+    createNotification(supabase, input.organizationId, {
+      title: `Alert: ${title}`,
+      message: `New alert created for ${supplierLabel} with severity ${severity} (score ${input.scoreRecord.score}).`,
+      type: "alert",
+      referenceType: "alert",
+      referenceId: createdAlert.id,
+    }).catch((err) => {
+      console.warn("[notification] Failed to create alert notification:", err);
+    });
+
     return {
       action: "created",
       alert: createdAlert,
@@ -461,6 +473,17 @@ export async function evaluateAlertForSupplierScore(
       score: input.scoreRecord.score,
       supplierId: input.scoreRecord.supplierId,
     },
+  });
+
+  // Non-blocking notification
+  createNotification(supabase, input.organizationId, {
+    title: `Alert Escalated: ${title}`,
+    message: `Alert escalated from severity ${activeAlert.severity} to ${severity} for ${supplierLabel} (score ${input.scoreRecord.score}).`,
+    type: "alert",
+    referenceType: "alert",
+    referenceId: escalatedAlert.id,
+  }).catch((err) => {
+    console.warn("[notification] Failed to create escalation notification:", err);
   });
 
   return {

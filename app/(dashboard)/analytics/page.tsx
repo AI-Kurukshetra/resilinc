@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { RiskTrendChart } from "@/app/(dashboard)/analytics/_components/risk-trend-chart";
 import { DisruptionTimeline } from "@/app/(dashboard)/analytics/_components/disruption-timeline";
+import { GeoRiskMap } from "@/app/(dashboard)/analytics/_components/geo-risk-map";
+import { WeatherRiskPanel } from "@/app/(dashboard)/analytics/_components/weather-risk-panel";
 import { getDashboardContext } from "@/lib/dashboard/context";
 import { getRiskEventTimeSeries, getScoreTrendHistory } from "@/lib/analytics/historical";
+import { listGeoRiskProfiles } from "@/lib/geopolitical/service";
 
 export const metadata: Metadata = {
   title: "Analytics | Resilinc Lite",
@@ -74,6 +77,41 @@ export default async function AnalyticsPage() {
     recentEvents = [];
   }
 
+  // M10.S3.e: Geopolitical risk profiles with supplier counts
+  let geoProfiles: Array<{
+    regionCode: string;
+    riskLevel: string;
+    stabilityIndex: number | null;
+    sanctionsActive: boolean;
+    supplierCount: number;
+  }> = [];
+
+  try {
+    const geoResult = await listGeoRiskProfiles(supabase, organizationId, { limit: 50, offset: 0 });
+
+    // Count suppliers per region
+    const { data: supplierRegions } = await supabase
+      .from("suppliers")
+      .select("region_code")
+      .eq("organization_id", organizationId)
+      .not("region_code", "is", null);
+
+    const regionCounts = new Map<string, number>();
+    for (const row of (supplierRegions ?? []) as Array<{ region_code: string }>) {
+      regionCounts.set(row.region_code, (regionCounts.get(row.region_code) ?? 0) + 1);
+    }
+
+    geoProfiles = geoResult.items.map((p) => ({
+      regionCode: p.regionCode,
+      riskLevel: p.riskLevel,
+      stabilityIndex: p.stabilityIndex,
+      sanctionsActive: p.sanctionsActive,
+      supplierCount: regionCounts.get(p.regionCode) ?? 0,
+    }));
+  } catch {
+    geoProfiles = [];
+  }
+
   return (
     <main className="space-y-4">
       <header className="mac-surface flex flex-col gap-2 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -101,6 +139,24 @@ export default async function AnalyticsPage() {
           <h2 className="mb-3 text-lg font-semibold text-slate-900">Disruption Timeline</h2>
           <DisruptionTimeline events={recentEvents} />
         </div>
+      </section>
+
+      <section>
+        <WeatherRiskPanel
+          initialEvents={
+            recentEvents
+              .filter((e) => e.event_type === "natural_disaster")
+              .slice(0, 10)
+          }
+        />
+      </section>
+
+      <section className="mac-surface rounded-2xl p-4">
+        <h2 className="mb-3 text-lg font-semibold text-slate-900">Geopolitical Risk Summary</h2>
+        <p className="mb-3 text-sm text-slate-600">
+          Region-level risk profiles with stability index, sanctions status, and affected supplier count.
+        </p>
+        <GeoRiskMap profiles={geoProfiles} />
       </section>
     </main>
   );

@@ -2,7 +2,7 @@ import type { PostgrestError, SupabaseClient, User } from "@supabase/supabase-js
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { DashboardErrorState } from "@/app/(dashboard)/_components/dashboard-error-state";
-import { DashboardNav } from "@/app/(dashboard)/_components/dashboard-nav";
+import { DashboardShell } from "@/app/(dashboard)/_components/dashboard-nav";
 import { DashboardUnauthorizedState } from "@/app/(dashboard)/_components/dashboard-unauthorized-state";
 import { isAuthBypassEnabled } from "@/lib/auth/feature-flags";
 import {
@@ -24,10 +24,9 @@ interface MembershipBootstrapResult {
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   if (isAuthBypassEnabled()) {
     return (
-      <div className="min-h-screen">
-        <DashboardNav />
-        <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:py-8">{children}</section>
-      </div>
+      <DashboardShell>
+        <section className="mx-auto w-full max-w-7xl px-6 py-8">{children}</section>
+      </DashboardShell>
     );
   }
 
@@ -74,10 +73,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   return (
-    <div className="min-h-screen">
-      <DashboardNav />
-      <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:py-8">{children}</section>
-    </div>
+    <DashboardShell>
+      <section className="mx-auto w-full max-w-7xl px-6 py-8">{children}</section>
+    </DashboardShell>
   );
 }
 

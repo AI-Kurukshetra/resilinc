@@ -4,6 +4,7 @@ import type {
   IncidentListQuery,
 } from "@/lib/validations/incidents";
 import { buildPlaybookActions } from "@/lib/incidents/playbook";
+import { createNotification } from "@/lib/notifications/service";
 
 interface IncidentRow {
   id: string;
@@ -428,6 +429,18 @@ export async function createIncidentFromAlert(
   }
 
   const detail = await getIncidentById(supabase, input.organizationId, incidentId);
+
+  // Non-blocking notification
+  createNotification(supabase, input.organizationId, {
+    title: `Incident Created: ${detail.title}`,
+    message: `New incident created from alert "${alert.title}" with ${actionTemplates.length} playbook actions.`,
+    type: "incident",
+    referenceType: "incident",
+    referenceId: detail.id,
+  }).catch((err) => {
+    console.warn("[notification] Failed to create incident notification:", err);
+  });
+
   return {
     created: true,
     incident: detail,

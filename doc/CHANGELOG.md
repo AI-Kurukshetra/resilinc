@@ -166,3 +166,67 @@
   - Business impact section component `business-impact-section.tsx` integrated into supplier detail page.
 - Updated dashboard navigation with "Supply Chain" and "Analytics" links.
 - Added dependencies: `react-force-graph-2d`, `recharts`.
+- Added M9 Risk Mitigation and Compliance:
+  - Migration `supabase/migrations/20260315110000_m9_mitigation_compliance.sql` adding `mitigation_plans`, `mitigation_actions`, `compliance_frameworks`, `compliance_items` tables with org-scoped RLS and indexes.
+  - Service `lib/mitigation/service.ts`: `createPlan()`, `updatePlan()`, `listPlans()`, `getPlanDetail()` (with embedded actions), `addAction()`, `updateActionStatus()`, `completePlan()` (validates all actions done first).
+  - Validation `lib/validations/mitigation.ts` with create/update/list/action schemas.
+  - API routes: `GET/POST /api/mitigation-plans`, `GET/PATCH /api/mitigation-plans/[planId]`, `GET/POST /api/mitigation-plans/[planId]/actions`, `PATCH /api/mitigation-plans/[planId]/actions/[actionId]/status`.
+  - Dashboard pages: `app/(dashboard)/mitigation/page.tsx` (list with status filter pills, strategy badges, priority indicator), `app/(dashboard)/mitigation/[planId]/page.tsx` (detail with action checklist), `mitigation/new/page.tsx` (create form page), loading/error states.
+  - Client components: `plan-create-form.tsx` (strategy select, priority slider, linked supplier/alert select), `plan-action-list.tsx` (action checklist with status transitions + inline add + complete plan button gated on all actions done).
+  - Service `lib/compliance/service.ts`: `createFramework()`, `listFrameworks()`, `createItem()`, `listItems()`, `updateItemStatus()`, `getComplianceSummary()` (per-framework compliant%).
+  - Validation `lib/validations/compliance.ts` with framework/item schemas.
+  - API routes: `GET/POST /api/compliance/frameworks`, `GET/POST /api/compliance/frameworks/[frameworkId]/items`, `PATCH /api/compliance/frameworks/[frameworkId]/items/[itemId]`.
+  - Dashboard pages: `app/(dashboard)/compliance/page.tsx` (framework cards with progress bars), `app/(dashboard)/compliance/[frameworkId]/page.tsx` (items grouped by supplier with status badges), loading/error states.
+  - Client components: `compliance-status-badge.tsx` (status → color mapping), `item-assessment-form.tsx` (inline add requirement + update assessment with evidence notes + next review date), `compliance-framework-create-form.tsx`.
+  - Updated `dashboard-nav.tsx` to add "Mitigation" and "Compliance" nav links.
+- Added M10 Extended Risk Dimensions:
+  - Migration `supabase/migrations/20260315120000_m10_extended_risk.sql` adding `supplier_esg_scores`, `supplier_financial_health`, `geopolitical_risk_profiles` tables with org-scoped RLS and indexes.
+  - ESG service `lib/esg/service.ts`: `upsertEsgScore()` (auto-computes composite = E*0.4 + S*0.35 + G*0.25), `getEsgScore()`, `listEsgScores()`.
+  - Validation `lib/validations/esg.ts` with `EsgScoreUpsertSchema` (0-100 score fields with precision rounding).
+  - API routes: `GET /api/esg-scores` (list), `GET/PUT /api/esg-scores/[supplierId]` (get/upsert).
+  - Client component `esg-score-card.tsx` with E/S/G breakdown bars and composite score.
+  - Financial risk service `lib/financial-risk/service.ts`: `upsertFinancialHealth()` (auto-classifies risk level from Altman Z: <1.8=critical, <2.7=high, <3.0=medium, >=3.0=low), `getFinancialHealth()`, `listFinancialHealth()`.
+  - Validation `lib/validations/financial-risk.ts` with credit rating enum, revenue trend enum.
+  - API routes: `GET /api/financial-risk` (list), `GET/PUT /api/financial-risk/[supplierId]`.
+  - Client component `financial-health-card.tsx` with credit rating badge, Z-score, revenue trend arrow, risk level indicator.
+  - Geopolitical service `lib/geopolitical/service.ts`: `upsertGeoRiskProfile()`, `listGeoRiskProfiles()`, `getGeoRiskByRegion()`, `getSupplierGeoRisk()` (joins supplier.region_code to geopolitical profile).
+  - Validation `lib/validations/geopolitical.ts` with region code param, risk level enum.
+  - API routes: `GET/POST /api/geopolitical-risk`, `GET/PUT /api/geopolitical-risk/[regionCode]`.
+  - Client component `geo-risk-map.tsx` showing region risk summary table on analytics page.
+  - Extended supplier detail page with ESG score card, financial health card, and geopolitical risk section.
+  - Extended analytics page with geopolitical risk summary section including supplier counts per region.
+- Added M11 Operational Features:
+  - Migration `supabase/migrations/20260315130000_m11_operations.sql` adding `supplier_performance_records`, `part_inventory_levels`, `integrations` tables with org-scoped RLS and indexes.
+  - Performance service `lib/performance/service.ts`: `addPerformanceRecord()` (auto-computes overall_rating = delivery*0.4 + (100-rejection)*0.3 + lead_time_component*0.15 + responsiveness*20*0.15), `listPerformanceHistory()`, `getPerformanceSummary()`.
+  - Validation `lib/validations/performance.ts` with record create, list query, supplier param schemas.
+  - API routes: `GET/POST /api/performance`, `GET /api/performance/[supplierId]` (history + summary).
+  - Client component `performance-chart.tsx` with recharts LineChart showing delivery/quality/overall trends.
+  - Extended supplier detail page with performance summary metrics and trend chart.
+  - Inventory service `lib/inventory/service.ts`: `upsertInventoryLevel()` (auto-computes days_of_supply and risk_flag: stockout/critical/low/adequate), `listInventoryLevels()` with risk_flag filter, `getInventoryRiskSummary()`.
+  - Validation `lib/validations/inventory.ts` with upsert, list query, part param schemas.
+  - API routes: `GET/POST /api/inventory`, `GET/PUT /api/inventory/[partId]`.
+  - Dashboard page `app/(dashboard)/inventory/page.tsx` with risk summary KPI cards and color-coded stock level progress bars.
+  - Client component `stock-level-bars.tsx` with green/amber/red/black risk-flag color coding.
+  - Integration service `lib/integrations/service.ts`: `listIntegrations()`, `createIntegration()`, `updateIntegration()`, `testConnection()` (stub: returns success with 42ms latency).
+  - Validation `lib/validations/integrations.ts` with create, update, list query, ID param schemas.
+  - API routes: `GET/POST /api/integrations`, `GET/PATCH /api/integrations/[integrationId]`, `POST /api/integrations/[integrationId]/test`.
+  - Dashboard page `app/(dashboard)/settings/integrations/page.tsx` with integration cards showing type icons, status badges, and test connection button.
+  - Client component `integration-card.tsx` with type icons, status-colored badges, and test connection interaction.
+  - Updated `dashboard-nav.tsx` to add "Inventory" and "Settings" nav links.
+- Added M12 Communication, Transportation, and Final Polish:
+  - Migration `supabase/migrations/20260315140000_m12_comms_transport.sql` adding `notifications` and `transportation_routes` tables with org-scoped RLS and indexes.
+  - Notification service `lib/notifications/service.ts`: `createNotification()`, `listNotifications()` with read/unread filter, `markAsRead()`, `markAllAsRead()`, `getUnreadCount()`.
+  - Validation `lib/validations/notifications.ts` with create, list query, mark-read schemas.
+  - API routes: `GET/POST /api/notifications`, `POST /api/notifications/read` (mark single or all), `GET /api/notifications/count`.
+  - Client component `notification-bell.tsx` with bell icon, unread count badge, dropdown of recent notifications, mark-as-read actions, and 30-second polling.
+  - Wired non-blocking `createNotification()` calls into `lib/alerts/service.ts` (on alert create/escalate) and `lib/incidents/service.ts` (on incident create).
+  - Transportation service `lib/transportation/service.ts`: `listRoutes()` with mode/risk_level filters, `createRoute()` with auto risk assessment, `getRouteById()`, `updateRoute()` with re-assessment on mode/days change.
+  - Validation `lib/validations/transportation.ts` with route create, update, list query, ID param schemas.
+  - API routes: `GET/POST /api/transportation`, `GET/PATCH /api/transportation/[routeId]`.
+  - Dashboard page `app/(dashboard)/transportation/page.tsx` with route cards showing transport mode icons, risk level badges, facility names, transit days, and active disruptions.
+  - Client component `route-create-form.tsx` with modal form for adding new routes.
+  - Natural disaster monitor `lib/natural-disaster/monitor.ts`: `scanFacilityWeatherRisks()` queries org facilities with lat/lng, calls `WeatherRiskAdapter` per region, deduplicates by region+24h, creates `risk_events` with event_type='natural_disaster'.
+  - API endpoint `POST /api/natural-disaster/scan` triggering facility weather scan.
+  - Client component `weather-risk-panel.tsx` on analytics page showing recent natural disaster events and "Run Weather Scan" button.
+  - Phase 2 consolidated seed data `supabase/seed_phase2.sql` for all M8-M12 tables.
+  - Updated `dashboard-nav.tsx` with grouped navigation (Monitor/Respond/Manage) and integrated notification bell.

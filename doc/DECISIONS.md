@@ -176,3 +176,24 @@ Rationale: A simple multiplicative model provides an intuitive, explainable reve
 
 ## 2026-03-15 — Store part financial profiles in a dedicated table rather than extending parts
 Rationale: Financial data (annual spend, unit cost, volume, lead time) has different update patterns and ownership from core part metadata; a separate `part_financial_profiles` table with unique constraint on `(organization_id, part_id)` maintains clean separation while enabling the impact analysis feature.
+
+## 2026-03-15 — Auto-compute ESG composite score as weighted average (E:40%, S:35%, G:25%)
+Rationale: Environmental factors dominate supply chain ESG risk; a fixed 40/35/25 split keeps scoring transparent and reproducible without requiring per-org configuration, while still reflecting industry emphasis on environmental supply chain impact.
+
+## 2026-03-15 — Auto-classify financial risk level from Altman Z-score at upsert time
+Rationale: The Z-score thresholds (<1.8 critical, <2.7 high, <3.0 medium, >=3.0 low) are well-established financial indicators; computing risk level server-side keeps client logic simple and ensures consistent classification across API consumers.
+
+## 2026-03-15 — Link supplier geopolitical risk via region_code join rather than direct FK
+Rationale: Geopolitical risk is a region-level attribute shared across multiple suppliers; joining via `supplier.region_code` to `geopolitical_risk_profiles.region_code` avoids per-supplier duplication while enabling bulk region risk updates that cascade to all affected suppliers.
+
+## 2026-03-15 — Make notification creation non-blocking in alert/incident flows
+Rationale: Notifications are observational side-effects; they should never cause parent operations (alert generation, incident creation) to fail. Using fire-and-forget with catch+warn preserves core workflow reliability while still recording useful communication events.
+
+## 2026-03-15 — Stub route risk assessment with mode-based heuristics
+Rationale: A simple mode+transit-day heuristic (ocean=medium, air=low, road>5d=medium) provides meaningful default risk levels without requiring external logistics data sources, while the `assessRouteRisk()` function signature supports future replacement with real-time logistics APIs.
+
+## 2026-03-15 — Deduplicate natural disaster events by region+24h window
+Rationale: Weather scans run across multiple facilities that may share the same country_code; checking for existing `natural_disaster` events within a 24-hour window per region prevents duplicate risk event noise while still capturing genuinely new weather developments.
+
+## 2026-03-15 — Organize dashboard nav into Monitor/Respond/Manage groups
+Rationale: With 12+ nav items, a flat list degrades scanability; semantic grouping (Monitor for observability, Respond for action, Manage for configuration) reduces cognitive load and aligns with operational workflow stages.

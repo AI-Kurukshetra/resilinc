@@ -123,3 +123,114 @@
     ~ app/(dashboard)/_components/dashboard-nav.tsx (added Supply Chain + Analytics links)
   Deps added: react-force-graph-2d, recharts
   Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓  scripts/preflight.sh ✓
+
+[2026-03-15 21:13] coordinator — Completed M9 Risk Mitigation and Compliance (M9.S1, M9.S2):
+  M9.S1 Risk mitigation planning:
+    + supabase/migrations/20260315110000_m9_mitigation_compliance.sql (mitigation_plans, mitigation_actions, compliance_frameworks, compliance_items)
+    + lib/validations/mitigation.ts (MitigationPlanCreate/Update/ListQuery/ActionCreate/ActionStatus schemas)
+    + lib/mitigation/service.ts (createPlan, updatePlan, listPlans, getPlanDetail+actions, addAction, updateActionStatus, completePlan)
+    + app/api/mitigation-plans/route.ts (GET/POST)
+    + app/api/mitigation-plans/[planId]/route.ts (GET/PATCH + complete action)
+    + app/api/mitigation-plans/[planId]/actions/route.ts (GET/POST)
+    + app/api/mitigation-plans/[planId]/actions/[actionId]/status/route.ts (PATCH)
+    + app/(dashboard)/mitigation/page.tsx (list with status filter pills, strategy+priority badges)
+    + app/(dashboard)/mitigation/new/page.tsx (create form page)
+    + app/(dashboard)/mitigation/[planId]/page.tsx (detail with action checklist + completion button)
+    + app/(dashboard)/mitigation/_components/plan-create-form.tsx
+    + app/(dashboard)/mitigation/_components/plan-action-list.tsx
+    + app/(dashboard)/mitigation/loading.tsx, error.tsx, [planId]/loading.tsx, [planId]/error.tsx
+  M9.S2 Compliance and regulatory tracking:
+    + lib/validations/compliance.ts (Framework/Item create/update/list schemas)
+    + lib/compliance/service.ts (createFramework, listFrameworks, createItem, listItems, updateItemStatus, getComplianceSummary)
+    + app/api/compliance/frameworks/route.ts (GET/POST)
+    + app/api/compliance/frameworks/[frameworkId]/items/route.ts (GET/POST)
+    + app/api/compliance/frameworks/[frameworkId]/items/[itemId]/route.ts (PATCH)
+    + app/(dashboard)/compliance/page.tsx (framework cards + progress bars)
+    + app/(dashboard)/compliance/[frameworkId]/page.tsx (items grouped by supplier)
+    + app/(dashboard)/compliance/_components/compliance-status-badge.tsx
+    + app/(dashboard)/compliance/_components/item-assessment-form.tsx
+    + app/(dashboard)/compliance/_components/compliance-framework-create-form.tsx
+    + app/(dashboard)/compliance/loading.tsx, error.tsx, [frameworkId]/loading.tsx, [frameworkId]/error.tsx
+    ~ app/(dashboard)/_components/dashboard-nav.tsx (added Mitigation + Compliance links)
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓  scripts/preflight.sh ✓
+
+[2026-03-15 21:35] coordinator — Completed M10 Extended Risk Dimensions (M10.S1, M10.S2, M10.S3):
+  M10.S1 ESG risk evaluation:
+    + supabase/migrations/20260315120000_m10_extended_risk.sql (supplier_esg_scores, supplier_financial_health, geopolitical_risk_profiles)
+    + lib/validations/esg.ts (EsgScoreUpsertSchema, EsgScoreListQuerySchema)
+    + lib/esg/service.ts (upsertEsgScore with composite auto-compute E:40%+S:35%+G:25%, getEsgScore, listEsgScores)
+    + app/api/esg-scores/route.ts (GET list)
+    + app/api/esg-scores/[supplierId]/route.ts (GET/PUT upsert)
+    + app/(dashboard)/suppliers/_components/esg-score-card.tsx (E/S/G breakdown bars + composite)
+  M10.S2 Financial risk assessment:
+    + lib/validations/financial-risk.ts (FinancialHealthUpsertSchema, credit rating/revenue trend enums)
+    + lib/financial-risk/service.ts (upsertFinancialHealth with Altman Z-score auto-classification, getFinancialHealth, listFinancialHealth)
+    + app/api/financial-risk/route.ts (GET list)
+    + app/api/financial-risk/[supplierId]/route.ts (GET/PUT)
+    + app/(dashboard)/suppliers/_components/financial-health-card.tsx (credit rating badge, Z-score, revenue trend, risk level)
+  M10.S3 Geopolitical risk enhancement:
+    + lib/validations/geopolitical.ts (GeoRiskProfileUpsertSchema, region code param)
+    + lib/geopolitical/service.ts (upsertGeoRiskProfile, listGeoRiskProfiles, getGeoRiskByRegion, getSupplierGeoRisk)
+    + app/api/geopolitical-risk/route.ts (GET list/POST create)
+    + app/api/geopolitical-risk/[regionCode]/route.ts (GET/PUT)
+    + app/(dashboard)/analytics/_components/geo-risk-map.tsx (region risk summary table)
+    ~ app/(dashboard)/suppliers/[supplierId]/page.tsx (added ESG, financial health, geopolitical sections)
+    ~ app/(dashboard)/analytics/page.tsx (added geopolitical risk summary section)
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓  scripts/preflight.sh ✓
+
+[2026-03-15 21:48] coordinator — Completed M11 Operational Features (M11.S1, M11.S2, M11.S3):
+  M11.S1 Supplier performance tracking:
+    + supabase/migrations/20260315130000_m11_operations.sql (supplier_performance_records, part_inventory_levels, integrations)
+    + lib/validations/performance.ts (PerformanceRecordCreate, ListQuery, SupplierIdParam schemas)
+    + lib/performance/service.ts (addPerformanceRecord with auto-computed overall_rating, listPerformanceHistory, getPerformanceSummary)
+    + app/api/performance/route.ts (GET list/POST create)
+    + app/api/performance/[supplierId]/route.ts (GET history + summary)
+    + app/(dashboard)/suppliers/_components/performance-chart.tsx (recharts LineChart: delivery/quality/overall trends)
+    ~ app/(dashboard)/suppliers/[supplierId]/page.tsx (added performance summary + chart section)
+  M11.S2 Inventory risk assessment:
+    + lib/validations/inventory.ts (InventoryLevelUpsert, ListQuery, PartIdParam schemas)
+    + lib/inventory/service.ts (upsertInventoryLevel with auto risk flag + days-of-supply, listInventoryLevels, getInventoryRiskSummary)
+    + app/api/inventory/route.ts (GET list/POST create)
+    + app/api/inventory/[partId]/route.ts (GET/PUT)
+    + app/(dashboard)/inventory/page.tsx (risk summary cards + stock level bars)
+    + app/(dashboard)/inventory/_components/stock-level-bars.tsx (color-coded progress bars)
+    + app/(dashboard)/inventory/loading.tsx, error.tsx
+  M11.S3 Integration management:
+    + lib/validations/integrations.ts (IntegrationCreate/Update/ListQuery/IdParam schemas)
+    + lib/integrations/service.ts (listIntegrations, createIntegration, updateIntegration, testConnection stub)
+    + app/api/integrations/route.ts (GET/POST)
+    + app/api/integrations/[integrationId]/route.ts (GET/PATCH)
+    + app/api/integrations/[integrationId]/test/route.ts (POST connection test)
+    + app/(dashboard)/settings/integrations/page.tsx (integration cards with status badges)
+    + app/(dashboard)/settings/integrations/_components/integration-card.tsx (type icons, test connection button)
+    + app/(dashboard)/settings/integrations/loading.tsx
+    ~ app/(dashboard)/_components/dashboard-nav.tsx (added Inventory + Settings links)
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓  scripts/preflight.sh ✓
+
+[2026-03-15 22:05] coordinator — Completed M12 Communication, Transportation, and Final Polish (M12.S1, M12.S2, M12.S3):
+  M12.S1 Communication hub (notifications):
+    + supabase/migrations/20260315140000_m12_comms_transport.sql (notifications, transportation_routes tables)
+    + lib/validations/notifications.ts (NotificationCreate, ListQuery, MarkRead schemas)
+    + lib/notifications/service.ts (createNotification, listNotifications, markAsRead, markAllAsRead, getUnreadCount)
+    + app/api/notifications/route.ts (GET list/POST create)
+    + app/api/notifications/read/route.ts (POST mark read — notificationId or all:true)
+    + app/api/notifications/count/route.ts (GET unread count)
+    + app/(dashboard)/_components/notification-bell.tsx (bell icon with unread badge, dropdown, mark-read actions, 30s polling)
+    ~ lib/alerts/service.ts (non-blocking createNotification on alert create/escalate)
+    ~ lib/incidents/service.ts (non-blocking createNotification on incident create)
+  M12.S2 Transportation risk monitoring:
+    + lib/validations/transportation.ts (RouteCreate, RouteUpdate, RouteListQuery schemas)
+    + lib/transportation/service.ts (listRoutes, createRoute, getRouteById, updateRoute, assessRouteRisk stub)
+    + app/api/transportation/route.ts (GET/POST)
+    + app/api/transportation/[routeId]/route.ts (GET/PATCH)
+    + app/(dashboard)/transportation/page.tsx (route cards with mode icons, risk badges, facility linkage)
+    + app/(dashboard)/transportation/_components/route-create-form.tsx (modal create form)
+    + app/(dashboard)/transportation/loading.tsx, error.tsx
+  M12.S3 Natural disaster wiring and Phase 2 polish:
+    + lib/natural-disaster/monitor.ts (scanFacilityWeatherRisks using WeatherRiskAdapter, dedup by region+24h)
+    + app/api/natural-disaster/scan/route.ts (POST triggers facility weather scan)
+    + app/(dashboard)/analytics/_components/weather-risk-panel.tsx (panel with recent events + Run Weather Scan button)
+    ~ app/(dashboard)/analytics/page.tsx (added WeatherRiskPanel section)
+    + supabase/seed_phase2.sql (consolidated Phase 2 seed: financial profiles, mitigation plans+actions, compliance frameworks+items, ESG scores, financial health, geopolitical profiles, performance records, inventory levels, integrations, transportation routes, notifications)
+    ~ app/(dashboard)/_components/dashboard-nav.tsx (grouped navigation: Monitor/Respond/Manage + notification bell)
+  Checks passed: pnpm lint ✓  pnpm typecheck ✓  pnpm test ✓  scripts/preflight.sh ✓
